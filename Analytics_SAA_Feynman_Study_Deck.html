@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Data & Analytics для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Data &amp; Analytics для AWS SAA-C03</h1>
+  <p class="subtitle">Athena • Redshift • OpenSearch • EMR • Glue • QuickSight</p>
+  <p class="tag">27+ питань — service-level огляд для Solutions Architect</p>
+</section>
+
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на схему → вивчи exam tips → поясни вголос без підглядання.</li><li>На SAA-рівні НЕ треба знати, як писати Spark-код чи SQL — треба знати, ЯКИЙ сервіс коли обрати.</li></ol>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>Athena та Glue</h1>
+  <p class="subtitle">SQL-запити напряму до файлів у S3, без бази даних</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Amazon Athena</h2><p class="eyebrow">Query engine 'serverless' для S3</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Уяви, що в тебе є мільйони файлів (CSV, JSON, Parquet) у S3, і ти хочеш просто написати SQL-запит, не піднімаючи жодного сервера чи бази даних.</span></li><li><span class="b-title">Athena читає дані НАПРЯМУ з S3 (не копіюючи їх нікуди) і виконує стандартний SQL — платиш лише за обсяг ЗІСКАНОВАНИХ даних (не за час роботи сервера).</span></li><li><span class="b-title">Типове застосування: аналіз логів (напр. VPC Flow Logs, ALB access logs, CloudTrail logs), ad-hoc аналітика без потреби у постійній інфраструктурі.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>'Потрібно швидко проаналізувати логи, що лежать в S3, без розгортання БД' → Athena. Ключове слово: 'serverless SQL напряму по S3'.</div>
+  <footer class="section-tag">1. Athena, Glue & Data Lake</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Glue</h2><p class="eyebrow">ETL + каталог метаданих для всього озера даних</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Glue Crawler</span><span class="b-sub">автоматично 'сканує' дані в S3 і визначає схему (структуру стовпців/типів) — записує в Glue Data Catalog.</span></li><li><span class="b-title">Glue Data Catalog</span><span class="b-sub">централізований 'каталог метаданих' — Athena, Redshift Spectrum, EMR використовують САМЕ його, щоб знати структуру даних у S3.</span></li><li><span class="b-title">Glue ETL Jobs</span><span class="b-sub">серверless Apache Spark-завдання для трансформації даних (напр. CSV → Parquet, очищення, об'єднання джерел) без керування кластером.</span></li><li><span class="b-title">Glue DataBrew</span><span class="b-sub">проблема: написання Spark-коду для очищення 'брудних' даних (пропуски, дублікати, неправильний формат) вимагає інженера. DataBrew дає ВІЗУАЛЬНИЙ, no-code інтерфейс — аналітик БЕЗ навичок програмування сам 'малює' кроки трансформації (прибрати пропуски, розділити колонку) і одразу бачить прев'ю результату, плюс автоматичний профіль якості даних.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Athena БЕЗ Glue Data Catalog не знає структури файлів у S3 — Crawler + Catalog зазвичай йдуть ПЕРЕД тим, як можна робити SQL-запити через Athena. DataBrew — це 'Glue ETL для не-програмістів', не заміна, а альтернативний інтерфейс для того самого завдання.</div>
+  <footer class="section-tag">1. Athena, Glue & Data Lake</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Lake Formation</h2><p class="eyebrow">Централізований контроль доступу до Data Lake</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Проблема: у Data Lake (S3 + Glue Catalog) різні команди мають різні права доступу — 'відділ продажів може бачити лише свої таблиці, аналітики — тільки знеособлені колонки'. Керувати цим через окремі S3 bucket policy для кожної комбінації команда/таблиця/колонка — нереально складно і крихко.</span></li><li><span class="b-title">Lake Formation дає ЄДИНИЙ централізований шар контролю доступу НАД Glue Data Catalog — можна дозволяти доступ на рівні бази, ТАБЛИЦІ, і навіть ОКРЕМОЇ КОЛОНКИ чи РЯДКА (row/column-level security), і ці права одразу застосовуються, коли хтось звертається через Athena/Redshift Spectrum/EMR.</span></li><li><span class="b-title">Blueprints — готові шаблони для швидкого імпорту даних із зовнішніх джерел (RDS, on-premises БД) прямо в organizовану Data Lake структуру.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>'Потрібен контроль доступу на рівні окремих колонок/рядків таблиці в Data Lake, який діє однаково для Athena, Redshift Spectrum і EMR' → AWS Lake Formation, а не окремі IAM/S3 policy для кожного сервісу.</div>
+  <footer class="section-tag">1. Athena, Glue & Data Lake</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Athena & Glue</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Поясни своїми словами, чому Athena називають 'serverless'.</li><li>Навіщо потрібен Glue Crawler перед тим, як почати робити запити в Athena?</li><li>За що саме платиш в Athena?</li></ol>
+  <footer class="section-tag">1. Athena, Glue & Data Lake</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>Redshift, OpenSearch, EMR</h1>
+  <p class="subtitle">Коли одного S3 + Athena замало</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Amazon Redshift</h2><p class="eyebrow">Data Warehouse для складної бізнес-аналітики</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">На відміну від Athena (запити НАПРЯМУ по S3, без інфраструктури), Redshift — це ПОВНОЦІННИЙ кластер бази даних, куди дані СПОЧАТКУ завантажують (ETL/ELT).</span></li><li><span class="b-title">Оптимізований для СКЛАДНИХ аналітичних запитів з JOIN по мільярдах рядків (OLAP), на відміну від RDS (OLTP — багато маленьких транзакцій).</span></li><li><span class="b-title">Redshift Spectrum</span><span class="b-sub">звичайний Redshift-запит працює лише з даними, які ти ЗАВАНТАЖИВ у кластер. Spectrum розширює це: Redshift-запит (SQL) може звертатись НАПРЯМУ до файлів у S3 (через Glue Data Catalog), не копіюючи їх у кластер — окремий, зовнішній обчислювальний шар Spectrum сканує S3 і повертає результат так, ніби це звичайна таблиця Redshift. Дозволяє поєднати 'гарячі' дані в кластері з 'холодним' архівом у S3 в ОДНОМУ запиті.</span></li><li><span class="b-title">Redshift ML</span><span class="b-sub">дозволяє тренувати і викликати ML-модель ПРЯМО з SQL-запиту (CREATE MODEL) — не треба експортувати дані в окремий ML-сервіс (SageMaker) і писати Python-код; результат передбачення повертається як звичайний стовпець у SQL SELECT.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>'Складна бізнес-аналітика (BI), що вимагає JOIN багатьох великих таблиць, регулярні dashboard-звіти' → Redshift, а не Athena (Athena для 'разових' SQL-запитів по файлах).</div>
+  <footer class="section-tag">2. Redshift, OpenSearch & EMR</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Amazon OpenSearch (ex: ElasticSearch)</h2><p class="eyebrow">Пошук і аналіз за межами SQL</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Уяви пошук слова в паперовій книзі: можна гортати сторінку за сторінкою (повільно, як SQL LIKE '%слово%' — сканує КОЖЕН рядок), а можна відкрити АЛФАВІТНИЙ ПОКАЖЧИК в кінці книги, що одразу каже, на яких сторінках зустрічається слово.</span></li><li><span class="b-title">OpenSearch заздалегідь будує саме такий 'покажчик' (inverted index): для кожного слова зберігає список документів, де воно є. Тому пошук за словом — миттєвий, незалежно від обсягу даних, на відміну від послідовного сканування файлів (як робить Athena).</span></li><li><span class="b-title">Типове застосування: пошук по каталогу товарів (e-commerce), аналіз і візуалізація логів застосунків (аналог 'ELK stack' але керований AWS) — саме там, де важлива швидкість повнотекстового пошуку, а не складні SQL JOIN.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Athena сканує файли КОЖЕН РАЗ заново (добре для рідкісних ad-hoc запитів). OpenSearch будує індекс ЗАЗДАЛЕГІДЬ (добре, коли той самий пошук повторюється тисячі разів на секунду).</div>
+  <footer class="section-tag">2. Redshift, OpenSearch & EMR</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Amazon EMR</h2><p class="eyebrow">Elastic MapReduce — керований Hadoop/Spark-кластер</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Для дуже великих обсягів даних, що вимагають РОЗПОДІЛЕНОЇ обробки (Hadoop, Spark, Hive, Presto) — коли Athena/Glue вже недостатньо гнучкі для складної кастомної логіки.</span></li><li><span class="b-title">AWS керує кластером (provisioning, patching), але ти сам пишеш і контролюєш Big Data-завдання (на відміну від Glue, де AWS абстрагує все за тебе).</span></li><li><span class="b-title">Типове застосування: масштабна трансформація/аналіз петабайтів даних, машинне навчання на великих датасетах, обробка логів у величезних масштабах.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Спрощена ієрархія складності: Athena (найпростіше, SQL по S3) → Glue (керовані ETL-джоби) → EMR (повний контроль над Hadoop/Spark-кластером, найбільша гнучкість і складність).</div>
+  <footer class="section-tag">2. Redshift, OpenSearch & EMR</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Redshift, OpenSearch & EMR</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Поясни своїми словами, чим Redshift відрізняється від Athena.</li><li>Коли обереш OpenSearch замість Athena для аналізу логів?</li><li>Навіщо взагалі потрібен EMR, якщо є простіші Glue і Athena?</li></ol>
+  <footer class="section-tag">2. Redshift, OpenSearch & EMR</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>QuickSight та типовий Big Data Pipeline</h1>
+  <p class="subtitle">Візуалізація і збирання всього докупи</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Amazon QuickSight</h2><p class="eyebrow">BI-дашборди без встановлення софту</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Serverless business intelligence інструмент — будуєш інтерактивні дашборди й візуалізації, підключаючись до Redshift, Athena, RDS, S3 та інших джерел.</span></li><li><span class="b-title">SPICE</span><span class="b-sub">уяви, що 100 менеджерів одночасно відкрили той самий дашборд — БЕЗ SPICE кожне відкриття дашборду означало б новий важкий запит до Redshift/Athena (повільно, і джерело 'задихається' від навантаження). SPICE один раз завантажує потрібні дані в швидку оперативну пам'ять QuickSight, і всі 100 менеджерів отримують відповідь з ЦІЄЇ копії — джерело даних більше не чіпається.</span></li><li><span class="b-title">Типове застосування: показати керівництву dashboard з бізнес-метриками, не вимагаючи від них SQL-навичок.</span></li></ul></div>
+  
+  <footer class="section-tag">3. QuickSight та Big Data Pipeline</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Типовий Big Data Ingestion Pipeline</h2><p class="eyebrow">Як усе поєднується докупи</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">1. Збір: Kinesis Data Streams/Firehose приймають дані в реальному часі (логи, кліки, IoT) → складають у S3 (data lake).</span></li><li><span class="b-title">2. Каталогізація: Glue Crawler сканує S3 і будує схему в Glue Data Catalog.</span></li><li><span class="b-title">3. Трансформація: Glue ETL Jobs (або EMR для складнішого) очищають/перетворюють дані.</span></li><li><span class="b-title">4. Аналіз: Athena для разових SQL-запитів, Redshift для складної BI-аналітики, OpenSearch для пошуку/логів.</span></li><li><span class="b-title">5. Візуалізація: QuickSight будує дашборди для бізнес-користувачів.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Це один із найпоширеніших 'end-to-end' архітектурних сценаріїв на іспиті — уміння розпізнати КОЖЕН крок і правильний сервіс для нього дуже цінується.</div>
+  <footer class="section-tag">3. QuickSight та Big Data Pipeline</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: QuickSight та Pipeline</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Опиши власними словами повний шлях даних від 'IoT-сенсор надсилає дані' до 'керівник бачить dashboard'.</li><li>Навіщо потрібен SPICE у QuickSight?</li><li>Чому Glue Data Catalog — це 'сполучна ланка' між збором даних і аналітикою?</li></ol>
+  <footer class="section-tag">3. QuickSight та Big Data Pipeline</footer>
+</section>
+
+
+<section class="slide cover closing">
+  <h1>Підсумок: Data & Analytics одним поглядом</h1>
+  <ul class="recap"><li>Athena: serverless SQL напряму по S3, платиш за обсяг сканованих даних</li><li>Glue: Crawler (визначає схему) + Data Catalog (метадані) + ETL Jobs (трансформація)</li><li>Redshift: повноцінний Data Warehouse для складної BI-аналітики (OLAP, JOIN мільярдів рядків)</li><li>OpenSearch: повнотекстовий пошук і аналіз логів. EMR: керований Hadoop/Spark для найскладніших Big Data задач</li><li>QuickSight: BI-дашборди зі SPICE-кешем. Типовий pipeline: Kinesis → S3 → Glue → Athena/Redshift → QuickSight</li></ul>
+  <p class="tag">На SAA-рівні достатньо впевнено співставляти сценарій із правильним сервісом — глибокі технічні деталі кожного інструменту лишаються для Data Analytics спеціалізації.</p>
+</section>
+
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 17</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+</body>
+</html>

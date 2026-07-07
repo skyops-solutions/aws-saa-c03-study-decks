@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>IAM для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>IAM для AWS SAA-C03</h1>
+  <p class="subtitle">Users • Groups • Roles • Policies • Organizations • Policy Evaluation Logic</p>
+  <p class="tag">43+ питання — фундамент домену Security (30% ваги іспиту)</p>
+</section>
+
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на схему → вивчи exam tips → поясни вголос без підглядання.</li><li>IAM — це 'мова', якою написані майже всі security-питання іспиту. Розумій Policy Evaluation Logic досконало.</li></ol>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>IAM: Users, Groups, Policies, Roles</h1>
+  <p class="subtitle">Хто ти і що тобі можна</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Що таке IAM? (як для 5-річного)</h2><p class="eyebrow">Аналогія: пропускна система в офісі</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Уяви офіс з картками-перепустками: кожен співробітник (User) має картку, картки можна групувати за відділом (Group), а правила доступу (Policy) визначають, куди саме можна заходити.</span></li><li><span class="b-title">IAM = Identity and Access Management — глобальний (не regional) сервіс AWS для керування 'хто може робити що' в акаунті.</span></li><li><span class="b-title">Root user (обліковий запис, створений при реєстрації) має АБСОЛЮТНО всі права — його НЕ можна обмежити policy, тому AWS рекомендує НЕ використовувати root для щоденної роботи.</span></li><li><span class="b-title">За замовчуванням новий IAM User не має ЖОДНИХ прав (implicit deny) — доки йому явно не додати policy.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Перше, що варто зробити з новим AWS-акаунтом: увімкнути MFA на root, створити окремого IAM-адміністратора, і більше НЕ користуватись root-обліковкою.</div>
+  <footer class="section-tag">1. IAM Основи</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Users, Groups, Roles — у чому різниця</h2><p class="eyebrow">Найпростіша, але важлива класифікація</p></header>
+  <div class="body"><div class="cols"><div class="col"><ul class="bullets"><li><span class="b-title">User</span><span class="b-sub">конкретна особа чи застосунок з довготривалими credentials (пароль/access keys).</span></li><li><span class="b-title">Group</span><span class="b-sub">колекція Users — policy, прикріплена до групи, застосовується до ВСІХ її учасників (групи НЕ можна вкладати одна в одну).</span></li><li><span class="b-title">Role</span><span class="b-sub">набір прав, який можна ТИМЧАСОВО 'приміряти' (assume) — використовується EC2/Lambda/іншими AWS-сервісами, або іншими акаунтами. Немає постійних credentials.</span></li><li><span class="b-title">Policy</span><span class="b-sub">JSON-документ, що описує дозволи (Effect/Action/Resource/Condition).</span></li></ul></div><div class="col img-col"><img class="icon-diagram" src="data:image/png;base64,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" alt="IAM diagram"></div></div></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Роль (Role) видає ТИМЧАСОВІ credentials через STS (Security Token Service — окремий AWS-сервіс, єдина задача якого — видавати короткострокові тимчасові credentials замість постійних) за замовчуванням на 1 годину. Це найбезпечніший спосіб надати доступ сервісу чи іншому акаунту: навіть якщо ці тимчасові credentials хтось перехопить, вони самі стануть непридатними за годину.</div>
+  <footer class="section-tag">1. IAM Основи</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Типи Policy</h2><p class="eyebrow">Різні способи описати дозволи</p></header>
+  <div class="body"><table><thead><tr><th>Тип policy</th><th>До чого прикріплюється</th><th>Приклад</th></tr></thead><tbody><tr><td>Identity-based policy</td><td>User / Group / Role</td><td>'Цей User може читати S3 bucket X'</td></tr><tr><td>Resource-based policy</td><td>Сам ресурс (S3 bucket, SQS queue, KMS key)</td><td>'Bucket policy: акаунт Y може писати в цей bucket'</td></tr><tr><td>Permissions Boundary</td><td>User/Role — встановлює МАКСИМАЛЬНУ межу прав</td><td>'Навіть якщо policy дає більше, ця роль ніколи не зможе більше, ніж межа'</td></tr><tr><td>Service Control Policy (SCP)</td><td>AWS Organizations — акаунт/OU</td><td>'Жоден акаунт в цьому OU не може вимкнути CloudTrail'</td></tr><tr><td>Session Policy</td><td>Передається під час assume-role виклику</td><td>Додатково звужує права ТІЛЬКИ для цієї сесії</td></tr></tbody></table></div>
+  
+  <footer class="section-tag">1. IAM Основи</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: IAM Основи</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Поясни своїми словами різницю між User, Group і Role.</li><li>Чому Role — найбезпечніший спосіб надати EC2-інстансу доступ до S3?</li><li>Що таке Permissions Boundary і навіщо він потрібен?</li><li>Чому root user не можна обмежити звичайною IAM policy?</li></ol>
+  <footer class="section-tag">1. IAM Основи</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>Policy Evaluation Logic</h1>
+  <p class="subtitle">Як AWS вирішує 'дозволено чи ні'</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Порядок оцінки: за замовчуванням Deny</h2><p class="eyebrow">Найважливіший алгоритм на іспиті</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">1. Явний DENY завжди перемагає — якщо ХОЧ ОДНА застосовна policy каже Deny, це фінальне рішення (незалежно від інших Allow).</span></li><li><span class="b-title">2. Якщо явного Deny немає — перевіряється, чи є ХОЧА Б ОДИН явний Allow (у Identity-based АБО Resource-based policy).</span></li><li><span class="b-title">3. Якщо немає жодного явного Allow — результат за замовчуванням DENY (implicit deny).</span></li><li><span class="b-title">SCP (Organizations) і Permissions Boundary діють як 'стеля' — вони не дають прав самі по собі, а лише ОБМЕЖУЮТЬ те, що дозволено нижче.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Формула для запам'ятовування: 'Explicit Deny > Explicit Allow > Implicit Deny (за замовчуванням)'. SCP/Boundary — це додаткові 'стелі', а не джерела дозволів.</div>
+  <footer class="section-tag">2. Policy Evaluation Logic</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Cross-Account доступ</h2><p class="eyebrow">Коли Role потрібна ОБОВ'ЯЗКОВО</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Щоб дати користувачу з Акаунту A доступ до ресурсу в Акаунті B: створюєш Role в Акаунті B з Trust Policy, що дозволяє Акаунту A 'приміряти' цю роль.</span></li><li><span class="b-title">Користувач з Акаунту A виконує sts:AssumeRole → отримує тимчасові credentials → діє від імені ролі в Акаунті B.</span></li><li><span class="b-title">Це набагато безпечніше, ніж створювати окремого IAM User в Акаунті B і ділитись його довготривалими credentials.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>'Компанія A повинна отримати тимчасовий доступ до ресурсів компанії B' — класичний натяк на Cross-Account IAM Role + AssumeRole.</div>
+  <footer class="section-tag">2. Policy Evaluation Logic</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>Пастки з практичних тестів</h2><p class="eyebrow">Permissions Boundary vs SCP — на чому саме ламаються</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Permissions Boundary працює ЛИШЕ на User/Role</span><span class="b-sub">не можна прикріпити Permissions Boundary до Group. Якщо треба обмежити 'стелю' прав для цілої команди — доведеться ставити Boundary на КОЖНОГО User/Role окремо, або обмежувати через SCP на рівні акаунту.</span></li><li><span class="b-title">SCP НЕ діє на management account організації</span><span class="b-sub">і не обмежує service-linked roles (спеціальні ролі, які AWS-сервіси створюють самі для себе). Пастка: 'ми поставили SCP, що забороняє все, а адмін management-акаунту все одно все може' — це очікувана поведінка, не баг.</span></li><li><span class="b-title">Явна відмова від self-escalation</span><span class="b-sub">IAM policy, прикріплена ПРЯМО до User, може бути змінена/видалена самим цим User (якщо в нього є права iam:PutUserPolicy) — це НЕ захищає від підвищення прав. Permissions Boundary чи SCP, які User не може редагувати сам, — єдиний надійний спосіб капнути максимум прав.</span></li></ul></div>
+  <div class="note warn"><span class="note-label">EXAM TIP</span>Типова пастка практичних тестів: 'як гарантовано не дати User підвищити собі права' → відповідь завжди Permissions Boundary або SCP (те, чим User НЕ управляє), ніколи не 'просто IAM policy'.</div>
+  <footer class="section-tag">2. Policy Evaluation Logic</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Policy Evaluation Logic</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Policy X дозволяє S3:GetObject, а інша policy на тому ж User явно забороняє (Deny) той самий Action. Який результат?</li><li>Чим SCP відрізняється від звичайної IAM policy? Чи може SCP САМ дати дозвіл?</li><li>Опиши покроково, як налаштувати cross-account доступ через IAM Role.</li><li>Чому Permissions Boundary не можна прикріпити до Group, а лише до User/Role?</li><li>Чому SCP не захищає management account організації від адміністратора?</li></ol>
+  <footer class="section-tag">2. Policy Evaluation Logic</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>Organizations, IAM Identity Center, Directory Services</h1>
+  <p class="subtitle">Керування на рівні багатьох акаунтів</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Organizations</h2><p class="eyebrow">Централізоване керування багатьма AWS-акаунтами</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Що це</span><span class="b-sub">дозволяє об'єднати кілька AWS-акаунтів в одну структуру (Organizational Units) з єдиним білінгом і централізованими правилами (SCP).</span></li><li><span class="b-title">Consolidated Billing</span><span class="b-sub">один рахунок на всю організацію + об'єднані знижки за обсягом (volume discounts) і Reserved Instance sharing між акаунтами.</span></li><li><span class="b-title">Best practice</span><span class="b-sub">окремі акаунти для prod/dev/security/logging — ізоляція blast radius, а не один 'великий' акаунт на все.</span></li><li><span class="b-title">Tag Policies</span><span class="b-sub">стандартизують теги ресурсів (напр. обов'язковий тег 'CostCenter') на рівні всієї організації.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>'Потрібна ізоляція середовищ і централізований контроль витрат для 20 команд' → AWS Organizations з окремими акаунтами на команду/середовище.</div>
+  <footer class="section-tag">3. IAM Advanced: Organizations, Identity Center, Directory Services</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>IAM Identity Center (колишній AWS SSO)</h2><p class="eyebrow">Один логін для всіх акаунтів</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Дозволяє співробітнику залогінитись ОДИН раз і отримати доступ до КІЛЬКОХ AWS-акаунтів і застосунків (напр. Salesforce), без окремих IAM Users у кожному акаунті.</span></li><li><span class="b-title">Інтегрується із зовнішнім Identity Provider (Active Directory, Okta, Azure AD) через SAML/OIDC.</span></li><li><span class="b-title">Замінює застарілий патерн 'IAM User в кожному акаунті' на централізоване федероване управління ідентичністю.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>'Потрібен SSO для десятків AWS-акаунтів організації' → IAM Identity Center, а не створення однакових IAM Users у кожному акаунті окремо.</div>
+  <footer class="section-tag">3. IAM Advanced: Organizations, Identity Center, Directory Services</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Directory Services</h2><p class="eyebrow">Коли потрібен саме Active Directory</p></header>
+  <div class="body"><table><thead><tr><th>Варіант</th><th>Опис</th></tr></thead><tbody><tr><td>AWS Managed Microsoft AD</td><td>повноцінний, керований AWS Active Directory — для застосунків, яким потрібен саме AD-протокол</td></tr><tr><td>AD Connector</td><td>просто 'проксі' до ІСНУЮЧОГО on-premises Active Directory — не зберігає користувачів в AWS</td></tr><tr><td>Simple AD</td><td>спрощена, самостійна AD-сумісна директорія на базі Samba — для базових потреб без AWS-інтеграцій</td></tr></tbody></table></div>
+  
+  <footer class="section-tag">3. IAM Advanced: Organizations, Identity Center, Directory Services</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: IAM Advanced</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Навіщо потрібні AWS Organizations, якщо можна просто створити багато IAM Users в одному акаунті?</li><li>Чим IAM Identity Center відрізняється від звичайного IAM User?</li><li>Коли обереш AD Connector замість AWS Managed Microsoft AD?</li></ol>
+  <footer class="section-tag">3. IAM Advanced: Organizations, Identity Center, Directory Services</footer>
+</section>
+
+
+<section class="slide cover closing">
+  <h1>Підсумок: IAM одним поглядом</h1>
+  <ul class="recap"><li>User (постійні credentials) vs Role (тимчасові, assume) vs Group (колекція Users) — три різні інструменти</li><li>Policy Evaluation: Explicit Deny > Explicit Allow > Implicit Deny (за замовчуванням) — SCP/Boundary лише обмежують</li><li>Cross-account доступ = завжди через Role + AssumeRole, ніколи через спільні довготривалі credentials</li><li>Organizations (SCP, consolidated billing) + IAM Identity Center (SSO) — керування security на рівні багатьох акаунтів</li></ul>
+  <p class="tag">IAM — це 'граматика' security-питань іспиту. Якщо розумієш Policy Evaluation Logic — половина security-питань стає легшою.</p>
+</section>
+
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 18</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+</body>
+</html>

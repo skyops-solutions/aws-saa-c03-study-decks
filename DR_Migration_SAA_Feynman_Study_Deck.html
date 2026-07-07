@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>DR & Migrations для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Disaster Recovery &amp; Migrations для AWS SAA-C03</h1>
+  <p class="subtitle">RPO/RTO • DRS • DMS • AWS Backup • MGN</p>
+  <p class="tag">22+ питання — прості слова, аналогії, пастки іспиту</p>
+</section>
+
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на схему → вивчи exam tips → поясни вголос без підглядання.</li><li>Ключові терміни розділу — RPO і RTO. Якщо їх плутаєш, плутається все інше.</li></ol>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>RPO, RTO та стратегії Disaster Recovery</h1>
+  <p class="subtitle">Скільки даних і часу ти готовий втратити</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>RPO vs RTO (аналогія)</h2><p class="eyebrow">Останній збережений файл vs час на перезапуск гри</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">RPO (Recovery Point Objective)</span><span class="b-sub">'скільки даних я готовий втратити?' — точка в часі, до якої можна відновити дані. Якщо останній backup був годину тому — RPO = 1 година (втратиш зміни за цю годину).</span></li><li><span class="b-title">RTO (Recovery Time Objective)</span><span class="b-sub">'скільки часу застосунок може бути НЕДОСТУПНИЙ?' — максимально прийнятний час простою до повного відновлення роботи.</span></li><li><span class="b-title">Аналогія з відеогрою</span><span class="b-sub">RPO — це 'з якого save-файлу ти відновишся' (втратив прогрес після останнього збереження). RTO — це 'скільки часу займе завантажити гру заново'.</span></li><li><span class="b-title">Чим менші RPO/RTO</span><span class="b-sub">тим ДОРОЖЧЕ рішення — 'нуль втрачених даних, нуль простою' коштує значно більше, ніж 'можемо почекати кілька годин'.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Перше, що треба зробити в задачі на DR: знайти в умові слова 'скільки даних можна втратити' (RPO) і 'скільки часу можна бути offline' (RTO) — вони визначають, яка стратегія підходить.</div>
+  <footer class="section-tag">1. RPO, RTO та стратегії DR</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>4 класичні стратегії DR</h2><p class="eyebrow">Від найдешевшої до найдорожчої</p></header>
+  <div class="body"><table><thead><tr><th>Стратегія</th><th>RPO/RTO</th><th>Опис</th></tr></thead><tbody><tr><td>Backup & Restore</td><td>Години-дні (найбільші)</td><td>Найдешевше: регулярні бекапи в S3/Glacier, відновлення 'з нуля' при катастрофі</td></tr><tr><td>Pilot Light</td><td>Десятки хвилин</td><td>Мінімальна 'версія' критичних систем постійно працює в DR-регіоні (напр. тільки БД реплікується), решту розгортаєш при потребі</td></tr><tr><td>Warm Standby</td><td>Хвилини</td><td>Зменшена, але ПОВНІСТЮ функціональна копія системи постійно працює в DR-регіоні, масштабується при перемиканні</td></tr><tr><td>Multi-Site (Hot/Hot)</td><td>Майже нуль</td><td>Повна копія системи активно працює в ОБОХ регіонах одночасно (active-active). Сам перемикання трафіку між регіонами — окрема задача мережевого рівня, не 'магія': зазвичай Route 53 з health checks (DNS-based failover) або Global Accelerator постійно перевіряють здоров'я обох регіонів і спрямовують користувачів лише на здорові — найдорожче, але майже миттєве перемикання</td></tr></tbody></table></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Чим 'тепліша' стратегія (Pilot Light → Warm Standby → Multi-Site) — тим менші RPO/RTO, але вища вартість підтримки постійно працюючої інфраструктури.</div>
+  <footer class="section-tag">1. RPO, RTO та стратегії DR</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: RPO, RTO та стратегії DR</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Поясни своїми словами різницю між RPO і RTO так, щоб зрозумів не-технічний керівник.</li><li>Чому Multi-Site (Hot/Hot) найдорожчий, і коли ця ціна виправдана?</li><li>Опиши різницю між Pilot Light і Warm Standby.</li></ol>
+  <footer class="section-tag">1. RPO, RTO та стратегії DR</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>AWS DRS та MGN</h1>
+  <p class="subtitle">Автоматизована реплікація серверів у хмару</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Elastic Disaster Recovery (DRS)</h2><p class="eyebrow">Постійна реплікація on-premises серверів у AWS 'про запас'</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Встановлюєш легкий агент на on-premises (чи інший хмарний) сервер — він БЕЗПЕРЕРВНО реплікує диски сервера у 'легку' (low-cost) стейджинг-область в AWS.</span></li><li><span class="b-title">У звичайному режимі в AWS НЕ працює повноцінна копія сервера — лише накопичуються дані реплікації (дешево).</span></li><li><span class="b-title">При катастрофі ('failover') DRS за хвилини піднімає ПОВНОЦІННІ EC2-інстанси з накопичених даних — це і є 'Pilot Light'/'Warm Standby' підхід, АВТОМАТИЗОВАНИЙ сервісом.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>DRS = 'сервіс для DR' (тимчасове перемикання при катастрофі, з наміром повернутись on-premises чи лишитись в AWS за потреби).</div>
+  <footer class="section-tag">2. Elastic Disaster Recovery (DRS) & Application Migration (MGN)</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Application Migration Service (MGN)</h2><p class="eyebrow">Схожа технологія, інша МЕТА</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">MGN використовує ТУ САМУ технологію реплікації, що й DRS (агент на сервері, безперервна реплікація дисків), — але мета ОСТАТОЧНА міграція, а не аварійне перемикання.</span></li><li><span class="b-title">'Lift-and-shift' підхід: переносиш сервер 'як є' в AWS, без переписування застосунку.</span></li><li><span class="b-title">Різниця DRS vs MGN — не в технології, а в НАМІРІ: DRS = 'тримати про запас на випадок катастрофи', MGN = 'переїжджаємо назавжди'.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Питання іспиту 'хочемо ПОСТІЙНО перенести сервери в AWS' → MGN. 'Хочемо мати DR-план на випадок збою основного дата-центру' → DRS. Технологія та сама, мета — різна.</div>
+  <footer class="section-tag">2. Elastic Disaster Recovery (DRS) & Application Migration (MGN)</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: DRS та MGN</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Поясни своїми словами, чим DRS відрізняється від MGN, якщо технологія у них схожа.</li><li>Як DRS забезпечує дешевизну в 'спокійному' режимі (без катастрофи)?</li></ol>
+  <footer class="section-tag">2. Elastic Disaster Recovery (DRS) & Application Migration (MGN)</footer>
+</section>
+
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>Database Migration Service, AWS Backup</h1>
+  <p class="subtitle">Спеціалізовані інструменти для баз даних і бекапів</p>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Database Migration Service (DMS)</h2><p class="eyebrow">Перенесення бази даних з мінімальним простоєм</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Переносить дані з БУДЬ-ЯКОЇ джерельної бази (on-premises MySQL, Oracle, тощо) в AWS (RDS, Aurora, Redshift тощо) — навіть МІЖ різними движками.</span></li><li><span class="b-title">Continuous Data Replication: джерельна БД лишається ПОВНІСТЮ робочою під час міграції — DMS безперервно копіює зміни, поки не настане момент фінального перемикання (мінімальний downtime).</span></li><li><span class="b-title">AWS Schema Conversion Tool (SCT) використовується РАЗОМ з DMS, коли рушії відрізняються (напр. Oracle → PostgreSQL) — конвертує схему й код (procedures/views), а DMS переносить самі дані.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>'Потрібно мігрувати production-базу даних БЕЗ значного простою' → DMS з Continuous Replication, а не 'просто зробити дамп і залити'.</div>
+  <footer class="section-tag">3. DMS, AWS Backup та інші інструменти міграції</footer>
+</section>
+
+
+<section class="slide content">
+  <header><h2>AWS Backup</h2><p class="eyebrow">Централізоване керування бекапами для БАГАТЬОХ сервісів</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Замість того, щоб налаштовувати бекапи ОКРЕМО для EBS, RDS, DynamoDB, EFS, кожен по-своєму — AWS Backup дає ОДНУ централізовану policy ('Backup Plan') для всіх одразу.</span></li><li><span class="b-title">Кросс-регіон і кросс-акаунт backup з коробки</span><span class="b-sub">навіщо саме кросс-АКАУНТ: якщо бекап зберігається в ТОМУ Ж акаунті, що й оригінальні дані, і цей акаунт скомпрометовано (напр. ransomware чи зловмисний інсайдер) — зловмисник може видалити ОДНОЧАСНО і дані, і їхній backup. Копіювання backup у ОКРЕМИЙ, ізольований акаунт (до якого немає прямого доступу з 'робочого' акаунту) захищає саме від цього сценарію.</span></li><li><span class="b-title">Life-cycle правила</span><span class="b-sub">автоматичний перехід старих бекапів у дешевше 'холодне' сховище (Backup Vault Cold Storage), як Lifecycle Rules в S3 — компроміс той самий: дешевше зберігання, але повільніше й дорожче відновлення, тому підходить лише для бекапів, які рідко (чи ніколи) не доводиться реально відновлювати.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>'Потрібна ОДНА централізована backup-політика для EBS + RDS + DynamoDB одночасно' → AWS Backup, а не налаштування кожного сервісу окремо.</div>
+  <footer class="section-tag">3. DMS, AWS Backup та інші інструменти міграції</footer>
+</section>
+
+
+<section class="slide self-test">
+  <header><h2>Self-Test: DMS та AWS Backup</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Навіщо потрібен Schema Conversion Tool РАЗОМ з DMS, а не сам DMS?</li><li>Чим AWS Backup кращий за налаштування бекапів для кожного сервісу окремо?</li><li>Поясни своїми словами, як DMS забезпечує мінімальний downtime при міграції production-бази.</li></ol>
+  <footer class="section-tag">3. DMS, AWS Backup та інші інструменти міграції</footer>
+</section>
+
+
+<section class="slide cover closing">
+  <h1>Підсумок: DR & Migrations одним поглядом</h1>
+  <ul class="recap"><li>RPO (скільки даних втратимо) і RTO (скільки часу простою) визначають стратегію: Backup&Restore → Pilot Light → Warm Standby → Multi-Site</li><li>DRS: автоматизована реплікація 'про запас' для аварійного перемикання (тимчасово або постійно)</li><li>MGN: та сама технологія, але мета — ОСТАТОЧНА міграція ('lift-and-shift') в AWS</li><li>DMS (+SCT для різних рушіїв): міграція БД з мінімальним downtime через continuous replication</li><li>AWS Backup: централізована backup-політика для багатьох AWS-сервісів одночасно</li></ul>
+  <p class="tag">Ключ до цього розділу — швидко визначати RPO/RTO зі сценарію, а потім підбирати ІНСТРУМЕНТ (DRS/MGN/DMS/Backup) під конкретну задачу (сервери vs БД vs загальний backup).</p>
+</section>
+
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 15</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+</body>
+</html>
