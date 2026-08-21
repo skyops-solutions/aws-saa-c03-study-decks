@@ -2,438 +2,515 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<title>AWS SAA-C03 — Хаб навчальних конспектів</title>
+<title>AWS SAA-C03 — Хаб навчальних конспектів (Feynman Study Hub)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
-    --dark: #232F3E; --dark2: #1b2530; --orange: #FF9900; --blue: #146EB4;
-    --red: #D13212; --green: #1D8102; --bg-light: #F5F7FA; --text: #232323;
+    --dark: #1e1333; --dark2: #120924; --orange: #FF9900; --blue: #146EB4;
+    --purple: #9D5BD2; --cyan: #00F0FF; --red: #D13212; --green: #1D8102;
+    --bg-light: #F5F7FA; --text: #232323;
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0; min-height: 100vh;
-    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
-    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(160deg, #130a21, #0a0412);
     color: var(--text);
   }
   header.hero {
-    padding: 6vh 8vw 4vh; text-align: center; color: white;
+    padding: 5vh 6vw 3vh; text-align: center; color: white;
   }
-  header.hero .accent-line { width: 80px; height: 5px; background: var(--orange); margin: 0 auto 24px; border-radius: 3px; }
-  header.hero h1 { font-size: 2.6rem; margin: 0 0 12px; }
-  header.hero p { color: #AAB7C4; font-size: 1.05rem; max-width: 720px; margin: 0 auto; }
+  .hero-banner-wrap {
+    max-width: 900px; margin: 0 auto 20px; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+  }
+  .hero-banner-img {
+    width: 100%; height: auto; display: block;
+  }
+  header.hero h1 { font-size: 2.6rem; margin: 0 0 10px; background: linear-gradient(90deg, #FFFFFF, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  header.hero p { color: #AAB7C4; font-size: 1.05rem; max-width: 760px; margin: 0 auto; line-height: 1.5; }
 
-  .overall-wrap { max-width: 900px; margin: 0 auto 5vh; padding: 0 8vw; }
+  .overall-wrap { max-width: 900px; margin: 0 auto 4vh; padding: 0 6vw; }
   .overall-bar { background: rgba(255,255,255,0.12); border-radius: 8px; height: 14px; overflow: hidden; }
-  .overall-fill { height: 100%; background: linear-gradient(90deg, var(--orange), #ffb84d); width: 0%; transition: width 0.4s; }
-  .overall-label { color: #AAB7C4; font-size: 0.9rem; margin-top: 8px; text-align: center; }
+  .overall-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--cyan)); width: 0%; transition: width 0.4s; }
+  .overall-label { color: #AAB7C4; font-size: 0.95rem; margin-top: 8px; text-align: center; font-weight: 600; }
 
   .grid {
-    max-width: 1200px; margin: 0 auto; padding: 0 6vw 8vh;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px;
+    max-width: 1200px; margin: 0 auto; padding: 0 5vw 8vh;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;
   }
   .card {
-    background: white; border-radius: 12px; padding: 22px; position: relative;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-    display: flex; flex-direction: column;
+    background: white; border-radius: 14px; padding: 20px; position: relative;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
   }
-  .card.is-planned { opacity: 0.6; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.4); }
+  .card-img-thumb {
+    width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;
+  }
   .card-link { text-decoration: none; color: inherit; display: block; flex: 1; }
-  .card-link.disabled { cursor: default; }
-  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .num { font-weight: 800; color: var(--orange); font-size: 1.3rem; }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .num { font-weight: 800; color: var(--orange); font-size: 1.2rem; }
   .badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
   .badge.ready { background: #E7F3E6; color: var(--green); }
-  .badge.planned { background: #F0F0F0; color: #888; }
-  .card h3 { margin: 0 0 8px; font-size: 1.2rem; color: var(--dark); }
-  .card .desc { margin: 0 0 14px; font-size: 0.92rem; color: #555; line-height: 1.4; }
-  .card .meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; margin-bottom: 12px; }
+  .badge.new { background: #F5EBFD; color: var(--purple); }
+  .card h3 { margin: 0 0 6px; font-size: 1.15rem; color: #1e1333; }
+  .card .desc { margin: 0 0 12px; font-size: 0.9rem; color: #555; line-height: 1.4; }
+  .card .meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; margin-bottom: 10px; }
   .card .qcount { font-weight: 700; color: var(--blue); }
   .mini-progress { background: var(--bg-light); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 4px; }
   .mini-progress-fill { height: 100%; width: 0%; background: var(--orange); transition: width 0.3s; }
   .mini-progress-label { font-size: 0.75rem; color: #999; margin-bottom: 10px; }
-  .chk { font-size: 0.8rem; color: #666; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .chk { font-size: 0.8rem; color: #666; display: flex; align-items: center; gap: 6px; cursor: pointer; margin-top: auto; }
   .chk input { accent-color: var(--orange); width: 15px; height: 15px; }
 
-  footer { text-align: center; color: #778; font-size: 0.85rem; padding: 0 8vw 6vh; }
+  footer { text-align: center; color: #889; font-size: 0.9rem; padding: 0 8vw 6vh; }
 </style>
 </head>
 <body>
+
 <header class="hero">
-  <div class="accent-line"></div>
-  <h1>AWS SAA-C03 — Хаб навчальних конспектів</h1>
-  <p>Метод Фейнмана: проста аналогія → схема з іконками → exam tips → self-test вголос. Прогрес зберігається локально у твоєму браузері.</p>
+  <div class="hero-banner-wrap">
+    <img src="assets/images/hero.jpg" alt="AWS SAA-C03 Cloud Architecture" class="hero-banner-img">
+  </div>
+  <h1>AWS SAA-C03 — Feynman Study Hub</h1>
+  <p>Повний інтерактивний конспект для підготовки до іспиту <strong>AWS Certified Solutions Architect Associate</strong> (Оновлено до версії <strong>v48 / 2026</strong>).</p>
 </header>
+
 <div class="overall-wrap">
   <div class="overall-bar"><div class="overall-fill" id="overallFill"></div></div>
-  <div class="overall-label" id="overallLabel">Завантаження прогресу…</div>
+  <div class="overall-label" id="overallLabel">Завантаження прогресу...</div>
 </div>
+
 <div class="grid">
 
+<!-- 20: NEW GenAI & Bedrock -->
+<div class="card is-ready" style="border: 2px solid var(--purple);">
+  <img src="assets/images/genai.jpg" alt="Generative AI & Bedrock" class="card-img-thumb">
+  <a class="card-link" href="GenAI_Bedrock_SAA_Feynman_Study_Deck.html" data-deck="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">20</span>
+      <span class="badge new">Новинка v48</span>
+    </div>
+    <h3>Generative AI & Bedrock</h3>
+    <p class="desc">Amazon Bedrock, Foundation Models, RAG, Knowledge Bases, Amazon Q, Kendra, SageMaker</p>
+    <div class="meta">
+      <span class="qcount">15+ нових питань</span>
+      <span class="domain">AI / Machine Learning</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 01: IAM -->
 <div class="card is-ready">
-  <a class="card-link" href="EC2_SAA_Feynman_Study_Deck.html" data-deck="EC2_SAA_Feynman_Study_Deck.html">
+  <img src="assets/images/security.jpg" alt="IAM Security" class="card-img-thumb">
+  <a class="card-link" href="IAM_SAA_Feynman_Study_Deck.html" data-deck="IAM_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">01</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>EC2 Basics, Instance Types, Security Groups, Purchasing & Spot</h3>
-    <p class="desc">Фундамент обчислень: типи інстансів, firewall, способи оплати</p>
+    <h3>IAM & Access Control</h3>
+    <p class="desc">Users, Groups, Roles, Policies, Organizations, SCP, STS, MFA, Identity Center</p>
     <div class="meta">
-      <span class="qcount">41+ питань на іспиті</span>
-      <span class="domain">Performance / Cost</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="EC2_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="EC2_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="EC2_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="S3_SAA_Feynman_Study_Deck.html" data-deck="S3_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">02</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>Amazon S3</h3>
-    <p class="desc">Object storage, storage classes, versioning, replication, security, CloudFront</p>
-    <div class="meta">
-      <span class="qcount">152+ питань на іспиті</span>
-      <span class="domain">Security / Cost</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="S3_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="S3_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="S3_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html" data-deck="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">03</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>RDS, Aurora & ElastiCache</h3>
-    <p class="desc">Керовані реляційні бази даних + in-memory кеш</p>
-    <div class="meta">
-      <span class="qcount">126+ питань на іспиті</span>
-      <span class="domain">Resilience / Performance</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="ELB_ASG_SAA_Feynman_Study_Deck.html" data-deck="ELB_ASG_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">04</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>High Availability: ELB & Auto Scaling</h3>
-    <p class="desc">Балансування навантаження та автоматичне масштабування</p>
-    <div class="meta">
-      <span class="qcount">77+ питань на іспиті</span>
-      <span class="domain">Resilience / Performance</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="ELB_ASG_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="ELB_ASG_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="ELB_ASG_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="VPC_SAA_Feynman_Study_Deck.html" data-deck="VPC_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">05</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>Networking — VPC</h3>
-    <p class="desc">Підмережі, NAT, Security vs NACL, Peering, Transit Gateway, Direct Connect</p>
-    <div class="meta">
-      <span class="qcount">64+ питань на іспиті</span>
-      <span class="domain">Security / Resilience</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="VPC_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="VPC_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="VPC_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="Serverless_SAA_Feynman_Study_Deck.html" data-deck="Serverless_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">06</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>Serverless: Lambda, DynamoDB, API Gateway</h3>
-    <p class="desc">Lambda concurrency/limits, DynamoDB, API Gateway, Step Functions, Cognito</p>
-    <div class="meta">
-      <span class="qcount">120+ питань на іспиті</span>
-      <span class="domain">Performance</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="Serverless_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Serverless_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="Serverless_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="Security_Encryption_SAA_Feynman_Study_Deck.html" data-deck="Security_Encryption_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">07</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>Security & Encryption: KMS, WAF, Shield</h3>
-    <p class="desc">Шифрування, SSM Parameter Store, Secrets Manager, DDoS-захист</p>
-    <div class="meta">
-      <span class="qcount">49+ питань на іспиті</span>
-      <span class="domain">Security</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="Security_Encryption_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Security_Encryption_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="Security_Encryption_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
-
-<div class="card is-ready">
-  <a class="card-link" href="IAM_SAA_Feynman_Study_Deck.html" data-deck="IAM_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">08</span>
-      <span class="badge ready">Готово</span>
-    </div>
-    <h3>IAM & AWS CLI (+ IAM Advanced)</h3>
-    <p class="desc">Users/Groups/Policies/Roles, Organizations, Policy Evaluation Logic</p>
-    <div class="meta">
-      <span class="qcount">43+ питань на іспиті</span>
-      <span class="domain">Security</span>
+      <span class="qcount">43+ питання на іспиті</span>
+      <span class="domain">Security (30%)</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="IAM_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="IAM_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="IAM_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="IAM_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 02: EC2 -->
 <div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="EC2 Compute" class="card-img-thumb">
+  <a class="card-link" href="EC2_SAA_Feynman_Study_Deck.html" data-deck="EC2_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">02</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>EC2 & Instance Storage</h3>
+    <p class="desc">Instance Types, EBS Volumes (gp3, io2), Instance Store, EFS, AMIs, Pricing Models</p>
+    <div class="meta">
+      <span class="qcount">55+ питань на іспиті</span>
+      <span class="domain">Compute</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="EC2_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="EC2_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="EC2_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 03: S3 -->
+<div class="card is-ready">
+  <img src="assets/images/databases.jpg" alt="S3 Storage" class="card-img-thumb">
+  <a class="card-link" href="S3_SAA_Feynman_Study_Deck.html" data-deck="S3_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">03</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>Amazon S3 Object Storage</h3>
+    <p class="desc">Storage Classes, Express One Zone, Lifecycle, Replication (CRR/SRR), Object Lock, Encryption</p>
+    <div class="meta">
+      <span class="qcount">48+ питань на іспиті</span>
+      <span class="domain">Storage</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="S3_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="S3_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="S3_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 04: RDS & Aurora -->
+<div class="card is-ready">
+  <img src="assets/images/databases.jpg" alt="RDS & Aurora" class="card-img-thumb">
+  <a class="card-link" href="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html" data-deck="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">04</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>RDS, Aurora & ElastiCache</h3>
+    <p class="desc">Multi-AZ vs Read Replicas, Aurora Serverless v2, Global Database, Redis vs Memcached</p>
+    <div class="meta">
+      <span class="qcount">52+ питання на іспиті</span>
+      <span class="domain">Databases</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 05: ELB & ASG -->
+<div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="ELB & ASG" class="card-img-thumb">
+  <a class="card-link" href="ELB_ASG_SAA_Feynman_Study_Deck.html" data-deck="ELB_ASG_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">05</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>ELB & Auto Scaling (ASG)</h3>
+    <p class="desc">ALB, NLB, GWLB, Target Groups, Scaling Policies, Health Checks, SSL Termination</p>
+    <div class="meta">
+      <span class="qcount">38+ питань на іспиті</span>
+      <span class="domain">High Availability</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="ELB_ASG_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="ELB_ASG_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="ELB_ASG_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 06: VPC -->
+<div class="card is-ready">
+  <img src="assets/images/networking.jpg" alt="VPC Networking" class="card-img-thumb">
+  <a class="card-link" href="VPC_SAA_Feynman_Study_Deck.html" data-deck="VPC_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">06</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>VPC & Network Routing</h3>
+    <p class="desc">Subnets, Route Tables, IGW, NAT Gateway, NACLs vs Security Groups, Peering, Transit Gateway</p>
+    <div class="meta">
+      <span class="qcount">60+ питань на іспиті</span>
+      <span class="domain">Networking</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="VPC_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="VPC_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="VPC_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 07: Serverless -->
+<div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="Serverless Lambda" class="card-img-thumb">
+  <a class="card-link" href="Serverless_SAA_Feynman_Study_Deck.html" data-deck="Serverless_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">07</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>Serverless: Lambda, API GW, DynamoDB</h3>
+    <p class="desc">Lambda Limits, API Gateway (REST/HTTP), DynamoDB DAX, Step Functions, AppSync</p>
+    <div class="meta">
+      <span class="qcount">46+ питань на іспиті</span>
+      <span class="domain">Serverless</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="Serverless_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="Serverless_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="Serverless_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 08: Security & Encryption -->
+<div class="card is-ready">
+  <img src="assets/images/security.jpg" alt="Security KMS" class="card-img-thumb">
+  <a class="card-link" href="Security_Encryption_SAA_Feynman_Study_Deck.html" data-deck="Security_Encryption_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">08</span>
+      <span class="badge ready">Готово</span>
+    </div>
+    <h3>Security, KMS & Encryption</h3>
+    <p class="desc">KMS, Secrets Manager, SSM Parameter Store, WAF, Shield, GuardDuty, Macie</p>
+    <div class="meta">
+      <span class="qcount">35+ питань на іспиті</span>
+      <span class="domain">Security</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="Security_Encryption_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="Security_Encryption_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="Security_Encryption_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+<!-- 09: Messaging & Decoupling -->
+<div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="Messaging SQS" class="card-img-thumb">
   <a class="card-link" href="Messaging_SAA_Feynman_Study_Deck.html" data-deck="Messaging_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">09</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Messaging: SQS, SNS, Kinesis</h3>
-    <p class="desc">Decoupling застосунків: черги, нотифікації, потокова обробка даних</p>
+    <h3>Messaging: SQS, SNS, Kinesis, EventBridge</h3>
+    <p class="desc">SQS (Standard/FIFO), SNS Fan-out, Kinesis Data Streams/Firehose, EventBridge Pipes</p>
     <div class="meta">
-      <span class="qcount">50+ питань на іспиті</span>
-      <span class="domain">Resilience</span>
+      <span class="qcount">42+ питання на іспиті</span>
+      <span class="domain">Integration</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Messaging_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Messaging_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Messaging_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Messaging_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 10: Storage Extras -->
 <div class="card is-ready">
+  <img src="assets/images/databases.jpg" alt="Storage Extras" class="card-img-thumb">
   <a class="card-link" href="Storage_Extras_SAA_Feynman_Study_Deck.html" data-deck="Storage_Extras_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">10</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>AWS Storage Extras & EC2 Instance Storage</h3>
-    <p class="desc">EBS, AMI, EFS, FSx, Snow Family, Storage Gateway, DataSync</p>
+    <h3>Storage Extras & Hybrid</h3>
+    <p class="desc">Snow Family (Snowball, Snowcone), Storage Gateway, FSx (Lustre, NetApp, OpenZFS, Windows)</p>
     <div class="meta">
-      <span class="qcount">109+ питань на іспиті</span>
-      <span class="domain">Cost / Resilience</span>
+      <span class="qcount">28+ питань на іспиті</span>
+      <span class="domain">Storage / Hybrid</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Storage_Extras_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Storage_Extras_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Storage_Extras_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Storage_Extras_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 11: Containers -->
 <div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="Containers EKS" class="card-img-thumb">
   <a class="card-link" href="Containers_SAA_Feynman_Study_Deck.html" data-deck="Containers_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">11</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Containers: ECS, Fargate, ECR, EKS</h3>
-    <p class="desc">Docker на AWS: оркестрація контейнерів</p>
+    <h3>Containers: ECS, EKS, Fargate, ECR</h3>
+    <p class="desc">ECS Task Definitions, Fargate Serverless Containers, EKS Kubernetes, App Runner</p>
     <div class="meta">
-      <span class="qcount">36+ питань на іспиті</span>
-      <span class="domain">Performance</span>
+      <span class="qcount">30+ питань на іспиті</span>
+      <span class="domain">Containers</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Containers_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Containers_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Containers_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Containers_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 12: CloudFront & GA -->
 <div class="card is-ready">
+  <img src="assets/images/networking.jpg" alt="CloudFront GA" class="card-img-thumb">
   <a class="card-link" href="CloudFront_GA_SAA_Feynman_Study_Deck.html" data-deck="CloudFront_GA_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">12</span>
       <span class="badge ready">Готово</span>
     </div>
     <h3>CloudFront & Global Accelerator</h3>
-    <p class="desc">CDN, кешування, geo restriction, прискорення глобального трафіку</p>
+    <p class="desc">CDN Caching, Origin Shield, OAC, Global Accelerator Anycast, CloudFront Functions vs Lambda@Edge</p>
     <div class="meta">
-      <span class="qcount">32+ питань на іспиті</span>
+      <span class="qcount">34+ питання на іспиті</span>
       <span class="domain">Performance</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="CloudFront_GA_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="CloudFront_GA_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="CloudFront_GA_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="CloudFront_GA_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 13: Monitoring -->
 <div class="card is-ready">
+  <img src="assets/images/hero.jpg" alt="Monitoring CloudWatch" class="card-img-thumb">
   <a class="card-link" href="Monitoring_SAA_Feynman_Study_Deck.html" data-deck="Monitoring_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">13</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>CloudWatch, CloudTrail & Config</h3>
-    <p class="desc">Моніторинг, аудит дій, відповідність конфігурації</p>
+    <h3>Monitoring: CloudWatch, CloudTrail, X-Ray</h3>
+    <p class="desc">CloudWatch Metrics/Logs/Alarms, CloudTrail Auditing, EventBridge, X-Ray Tracing</p>
     <div class="meta">
-      <span class="qcount">31+ питань на іспиті</span>
-      <span class="domain">Resilience / Security</span>
+      <span class="qcount">32+ питання на іспиті</span>
+      <span class="domain">Management</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Monitoring_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Monitoring_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Monitoring_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Monitoring_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 14: Analytics -->
 <div class="card is-ready">
+  <img src="assets/images/genai.jpg" alt="Analytics Athena" class="card-img-thumb">
   <a class="card-link" href="Analytics_SAA_Feynman_Study_Deck.html" data-deck="Analytics_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">14</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Data & Analytics</h3>
-    <p class="desc">Athena, Redshift, OpenSearch, EMR, Glue, QuickSight</p>
+    <h3>Analytics: Athena, Redshift, EMR, Glue</h3>
+    <p class="desc">Amazon Athena, Redshift Data Warehouse, AWS Glue ETL, QuickSight, OpenSearch</p>
     <div class="meta">
       <span class="qcount">27+ питань на іспиті</span>
-      <span class="domain">Performance</span>
+      <span class="domain">Analytics</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Analytics_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Analytics_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Analytics_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Analytics_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 15: DR & Migrations -->
 <div class="card is-ready">
+  <img src="assets/images/hero.jpg" alt="Disaster Recovery" class="card-img-thumb">
   <a class="card-link" href="DR_Migration_SAA_Feynman_Study_Deck.html" data-deck="DR_Migration_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">15</span>
       <span class="badge ready">Готово</span>
     </div>
     <h3>Disaster Recovery & Migrations</h3>
-    <p class="desc">RPO/RTO, DRS, DMS, AWS Backup, MGN, стратегії відновлення</p>
+    <p class="desc">RPO/RTO, Backup & Restore, Pilot Light, Warm Standby, Multi-Region Active-Active, AWS MGN, DMS</p>
     <div class="meta">
-      <span class="qcount">22+ питань на іспиті</span>
+      <span class="qcount">26+ питань на іспиті</span>
       <span class="domain">Resilience</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="DR_Migration_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="DR_Migration_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="DR_Migration_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="DR_Migration_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 16: Route 53 -->
 <div class="card is-ready">
+  <img src="assets/images/networking.jpg" alt="Route 53 DNS" class="card-img-thumb">
   <a class="card-link" href="Route53_SAA_Feynman_Study_Deck.html" data-deck="Route53_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">16</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Route 53</h3>
-    <p class="desc">DNS, 7 routing policies, health checks, CNAME vs Alias</p>
+    <h3>Route 53 DNS & Traffic Control</h3>
+    <p class="desc">Simple, Weighted, Latency, Failover, Geolocation, Geoproximity, Multi-Value Routing, Health Checks</p>
     <div class="meta">
-      <span class="qcount">18+ питань на іспиті</span>
-      <span class="domain">Resilience / Performance</span>
+      <span class="qcount">24+ питання на іспиті</span>
+      <span class="domain">Resilience / DNS</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Route53_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Route53_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Route53_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Route53_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 17: EC2 Advanced -->
 <div class="card is-ready">
+  <img src="assets/images/compute.jpg" alt="EC2 Advanced" class="card-img-thumb">
   <a class="card-link" href="EC2_Advanced_SAA_Feynman_Study_Deck.html" data-deck="EC2_Advanced_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">17</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>EC2 Advanced: ENI, Placement Groups, Hibernate</h3>
-    <p class="desc">Private/Public/Elastic IP, Placement Groups, ENI, Hibernate</p>
+    <h3>EC2 Advanced: ENI, Placement Groups</h3>
+    <p class="desc">Placement Groups (Cluster, Spread, Partition), Elastic Network Interfaces (ENI), Hibernate</p>
     <div class="meta">
-      <span class="qcount">— питань на іспиті</span>
-      <span class="domain">Resilience / Performance</span>
+      <span class="qcount">16+ питань на іспиті</span>
+      <span class="domain">Performance</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="EC2_Advanced_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="EC2_Advanced_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="EC2_Advanced_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="EC2_Advanced_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 18: Other Services -->
 <div class="card is-ready">
+  <img src="assets/images/hero.jpg" alt="Other Services" class="card-img-thumb">
   <a class="card-link" href="Other_Services_SAA_Feynman_Study_Deck.html" data-deck="Other_Services_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">18</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Other Services</h3>
-    <p class="desc">CloudFormation, SSM Session Manager, Trusted Advisor, Cost Explorer, Outposts, Batch, Amplify</p>
+    <h3>Other Services & Cost Optimization</h3>
+    <p class="desc">CloudFormation, SSM Session Manager, Trusted Advisor, Cost Explorer, AWS Budgets, Outposts</p>
     <div class="meta">
-      <span class="qcount">— питань на іспиті</span>
-      <span class="domain">Cost / Security</span>
+      <span class="qcount">20+ питань на іспиті</span>
+      <span class="domain">Cost / Governance</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="Other_Services_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="Other_Services_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="Other_Services_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="Other_Services_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
-
+<!-- 19: Machine Learning -->
 <div class="card is-ready">
+  <img src="assets/images/genai.jpg" alt="Machine Learning" class="card-img-thumb">
   <a class="card-link" href="ML_Overview_SAA_Feynman_Study_Deck.html" data-deck="ML_Overview_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">19</span>
       <span class="badge ready">Готово</span>
     </div>
-    <h3>Machine Learning Overview</h3>
-    <p class="desc">Rekognition, Transcribe, Polly, Comprehend, SageMaker — service-level огляд</p>
+    <h3>AWS AI/ML Services Overview</h3>
+    <p class="desc">Rekognition, Transcribe, Polly, Comprehend, Translate, Lex, Textract, Kendra</p>
     <div class="meta">
-      <span class="qcount">10+ питань на іспиті</span>
-      <span class="domain">Performance</span>
+      <span class="qcount">18+ питань на іспиті</span>
+      <span class="domain">AI / Machine Learning</span>
     </div>
     <div class="mini-progress"><div class="mini-progress-fill" data-fill="ML_Overview_SAA_Feynman_Study_Deck.html"></div></div>
-        <div class="mini-progress-label" data-label="ML_Overview_SAA_Feynman_Study_Deck.html">0%</div>
+    <div class="mini-progress-label" data-label="ML_Overview_SAA_Feynman_Study_Deck.html">0%</div>
   </a>
   <label class="chk"><input type="checkbox" data-check="ML_Overview_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
 </div>
-<footer>Джерело тем: курс AWS Certified Solutions Architect Associate (Stephane Maarek) + офіційний AWS Exam Guide SAA-C03. Готово 19 з 19 тем.</footer>
+
+<footer>Джерело тем: оновлений курс AWS Certified Solutions Architect Associate (Stephane Maarek v48) + офіційний AWS Exam Guide SAA-C03. Готово 20 з 20 тем.</footer>
+
 <script>
-  const READY_FILES = ['EC2_SAA_Feynman_Study_Deck.html', 'S3_SAA_Feynman_Study_Deck.html', 'RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html', 'ELB_ASG_SAA_Feynman_Study_Deck.html', 'VPC_SAA_Feynman_Study_Deck.html', 'Serverless_SAA_Feynman_Study_Deck.html', 'Security_Encryption_SAA_Feynman_Study_Deck.html', 'IAM_SAA_Feynman_Study_Deck.html', 'Messaging_SAA_Feynman_Study_Deck.html', 'Storage_Extras_SAA_Feynman_Study_Deck.html', 'Containers_SAA_Feynman_Study_Deck.html', 'CloudFront_GA_SAA_Feynman_Study_Deck.html', 'Monitoring_SAA_Feynman_Study_Deck.html', 'Analytics_SAA_Feynman_Study_Deck.html', 'DR_Migration_SAA_Feynman_Study_Deck.html', 'Route53_SAA_Feynman_Study_Deck.html', 'EC2_Advanced_SAA_Feynman_Study_Deck.html', 'Other_Services_SAA_Feynman_Study_Deck.html', 'ML_Overview_SAA_Feynman_Study_Deck.html'];
+  const READY_FILES = [
+    'GenAI_Bedrock_SAA_Feynman_Study_Deck.html',
+    'EC2_SAA_Feynman_Study_Deck.html',
+    'S3_SAA_Feynman_Study_Deck.html',
+    'RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html',
+    'ELB_ASG_SAA_Feynman_Study_Deck.html',
+    'VPC_SAA_Feynman_Study_Deck.html',
+    'Serverless_SAA_Feynman_Study_Deck.html',
+    'Security_Encryption_SAA_Feynman_Study_Deck.html',
+    'IAM_SAA_Feynman_Study_Deck.html',
+    'Messaging_SAA_Feynman_Study_Deck.html',
+    'Storage_Extras_SAA_Feynman_Study_Deck.html',
+    'Containers_SAA_Feynman_Study_Deck.html',
+    'CloudFront_GA_SAA_Feynman_Study_Deck.html',
+    'Monitoring_SAA_Feynman_Study_Deck.html',
+    'Analytics_SAA_Feynman_Study_Deck.html',
+    'DR_Migration_SAA_Feynman_Study_Deck.html',
+    'Route53_SAA_Feynman_Study_Deck.html',
+    'EC2_Advanced_SAA_Feynman_Study_Deck.html',
+    'Other_Services_SAA_Feynman_Study_Deck.html',
+    'ML_Overview_SAA_Feynman_Study_Deck.html'
+  ];
 
   function getProgress() {
     try { return JSON.parse(localStorage.getItem('saa_progress') || '{}'); } catch(e) { return {}; }
@@ -469,7 +546,7 @@
     const overallPct = READY_FILES.length ? Math.round(sumPct / READY_FILES.length) : 0;
     document.getElementById('overallFill').style.width = overallPct + "%";
     document.getElementById('overallLabel').textContent =
-      `Загальний прогрес: ${overallPct}% по ${READY_FILES.length} готових темах`;
+      `Загальний прогрес: ${overallPct}% по ${READY_FILES.length} готових темах (Оновлено до SAA-C03 v48)`;
   }
 
   document.querySelectorAll('[data-check]').forEach(cb => {

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Generative AI & Bedrock для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --dark: #1e1333; --dark2: #120924; --purple: #9D5BD2; --cyan: #00F0FF;
+    --orange: #FF9900; --red: #FF4D4D; --green: #00E676; --bg-light: #F8F5FC; --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0d0618; color: var(--text); scroll-behavior: smooth;
+  }
+  .deck { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100vh; }
+  .slide {
+    scroll-snap-align: start; width: 100vw; height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; padding: 6vh 8vw; background: white;
+  }
+  .slide.cover, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white; align-items: center; text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 90px; height: 5px; background: linear-gradient(90deg, var(--purple), var(--cyan)); margin-bottom: 24px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3rem; margin: 0 0 14px; background: linear-gradient(90deg, #FFFFFF, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .slide.cover .subtitle { color: var(--purple); font-size: 1.3rem; margin: 0 0 10px; font-weight: 600; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1.05rem; max-width: 760px; }
+
+  .slide.content header, .slide.self-test header {
+    background: linear-gradient(90deg, var(--dark), #2c164d);
+    margin: -6vh -8vw 3vh; padding: 3.5vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 1.85rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--cyan); margin: 0; font-size: 1rem; font-weight: 700; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.2; }
+  .col.banner-col { flex: 0.8; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .img-card { width: 100%; max-height: 42vh; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); object-fit: cover; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 14px; font-size: 1.05rem; line-height: 1.5; }
+  .bullets li::before { content: "✦"; color: var(--purple); font-weight: bold; margin-right: 10px; font-size: 1.1rem; }
+  .b-title { font-weight: 700; color: #1e1333; }
+  .b-sub { display: block; margin: 3px 0 0 20px; font-size: 0.93rem; color: #555; }
+
+  .note { margin-top: 2.5vh; padding: 14px 18px; border-radius: 8px; font-size: 0.95rem; line-height: 1.45; }
+  .note.tip { background: #F5EBFD; color: #4A1570; border-left: 4px solid var(--purple); }
+  .note.warn { background: #FDECEA; color: #7a1c0e; border-left: 4px solid var(--red); }
+  .note-label { display: block; font-weight: 800; margin-bottom: 3px; }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(18, 9, 36, 0.95); color: #ccc;
+    font-size: 0.85rem; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .navbar .brand { opacity: 0.9; color: white; font-weight: 700; }
+  .navbar .hub-link { color: var(--cyan); text-decoration: none; font-weight: 700; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--purple), var(--cyan)); z-index: 10; width: 0%; transition: width 0.15s; }
+  .section-tag { position: absolute; bottom: 3vh; right: 8vw; color: #888; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Generative AI & Bedrock для AWS SAA-C03</h1>
+  <p class="subtitle">Amazon Bedrock • Foundation Models • RAG • Amazon Q • Kendra • SageMaker</p>
+  <p class="tag">Оновлений модуль для версії SAA-C03 v48 — нові питання щодо Generative AI на іспиті</p>
+</section>
+
+<!-- Slide 1: Bedrock Overview -->
+<section class="slide content">
+  <header>
+    <p class="eyebrow">НОВИЙ СЕРВІС В SAA-C03</p>
+    <h2>1. Amazon Bedrock — Серверлес генеративний ШІ</h2>
+  </header>
+  <div class="cols">
+    <div class="col">
+      <ul class="bullets">
+        <li><span class="b-title">Повністю керований (Serverless) API для Foundation Models (FM):</span>
+          <span class="b-sub">Доступ до найкращих моделей від провідних AI-компаній: Anthropic Claude, Meta Llama, Mistral AI, AI21 Labs, Stability AI та Amazon Titan без необхідності керувати жодними серверами чи GPU.</span></li>
+        <li><span class="b-title">Приватність та безпека даних (Data Privacy):</span>
+          <span class="b-sub">Ваші дані, передані через Bedrock, <strong>НЕ використовуються</strong> для донавчання базових моделей і залишаються ізольованими у вашому AWS акаунті (VPC PrivateLink, KMS encryption).</span></li>
+        <li><span class="b-title">Customization (Fine-tuning):</span>
+          <span class="b-sub">Можливість донавчати моделі на власних даних у приватному S3-бакеті без розкриття промптів.</span></li>
+      </ul>
+      <div class="note tip"><span class="note-label">EXAM TIP (SAA-C03)</span>Якщо в питанні вимагається інтегрувати генеративний ШІ (LLM) без розгортання та адміністрування інфраструктури/GPU — правильною відповіддю ЗАВЖДИ є <strong>Amazon Bedrock</strong>, а не SageMaker!</div>
+    </div>
+    <div class="col banner-col">
+      <img src="assets/images/genai.jpg" alt="Amazon Bedrock AI" class="img-card">
+    </div>
+  </div>
+  <footer class="section-tag">1. Bedrock Overview</footer>
+</section>
+
+<!-- Slide 2: RAG & Knowledge Bases -->
+<section class="slide content">
+  <header>
+    <p class="eyebrow">АРХІТЕКТУРА RAG</p>
+    <h2>2. Bedrock Knowledge Bases & RAG</h2>
+  </header>
+  <div class="cols">
+    <div class="col">
+      <ul class="bullets">
+        <li><span class="b-title">Retrieval-Augmented Generation (RAG):</span>
+          <span class="b-sub">Архітектурний патерн, де LLM шукає актуальну корпоративну інформацію у векторній базі даних (OpenSearch, Pinecone, Aurora PostgreSQL pgvector) перед генерацією відповіді.</span></li>
+        <li><span class="b-title">Amazon Bedrock Knowledge Bases:</span>
+          <span class="b-sub">Автоматично підключає ваші документи з Amazon S3, генерує ембедінги (Embeddings) через Amazon Titan Embeddings і зберігає їх у Vector DB для точного пошуку.</span></li>
+        <li><span class="b-title">Amazon Bedrock Agents:</span>
+          <span class="b-sub">Агенти можуть автоматично розбивати запит користувача на кроки, звертатися до внутрішніх систем через <strong>AWS Lambda</strong> та виконувати дії (наприклад, забронювати квиток чи оновити запис у БД).</span></li>
+      </ul>
+      <div class="note tip"><span class="note-label">EXAM TIP</span>Коли потрібно, щоб модель відповідала строго на основі внутрішніх PDF/документів компанії в S3 — обирайте <strong>Bedrock Knowledge Bases (RAG)</strong>.</div>
+    </div>
+    <div class="col banner-col">
+      <img src="assets/images/genai.jpg" alt="RAG Architecture" class="img-card">
+    </div>
+  </div>
+  <footer class="section-tag">2. Knowledge Bases & RAG</footer>
+</section>
+
+<!-- Slide 3: Amazon Q Developer & Kendra -->
+<section class="slide content">
+  <header>
+    <p class="eyebrow">ENTERPRISE SEARCH & AI ASSISTANTS</p>
+    <h2>3. Amazon Q та Amazon Kendra</h2>
+  </header>
+  <div class="cols">
+    <div class="col">
+      <ul class="bullets">
+        <li><span class="b-title">Amazon Q Developer / Business:</span>
+          <span class="b-sub">Генеративний AI-помічник корпоративного рівня. Підключається до Slack, Confluence, Jira, S3, Salesforce і відповідає на питання співробітників з урахуванням прав доступу (ACL).</span></li>
+        <li><span class="b-title">Amazon Kendra — ML-пошуковик:</span>
+          <span class="b-sub">Інтелектуальний семантичний сервіс корпоративного пошуку. Шукає сенс документів (NLP), а не просто точні збіги ключових слів.</span></li>
+        <li><span class="b-title">Kendra vs OpenSearch:</span>
+          <span class="b-sub"><strong>Kendra</strong> — готовий сервіс для бізнес-документів з коробки. <strong>OpenSearch</strong> — гнучкий двигун для логів, аналітики та кастомного повнотекстового/векторного пошуку.</span></li>
+      </ul>
+      <div class="note tip"><span class="note-label">EXAM TIP</span>Якщо в компанії є тисячі інструкцій у Sharepoint/S3/Salesforce і потрібен готовий семантичний пошук без навчання моделей — обирайте <strong>Amazon Kendra</strong>.</div>
+    </div>
+    <div class="col banner-col">
+      <img src="assets/images/genai.jpg" alt="Amazon Kendra & Q" class="img-card">
+    </div>
+  </div>
+  <footer class="section-tag">3. Amazon Q & Kendra</footer>
+</section>
+
+<!-- Slide 4: SageMaker for Custom ML -->
+<section class="slide content">
+  <header>
+    <p class="eyebrow">CUSTOM MACHINE LEARNING</p>
+    <h2>4. Amazon SageMaker — Повний цикл ML</h2>
+  </header>
+  <div class="cols">
+    <div class="col">
+      <ul class="bullets">
+        <li><span class="b-title">Коли використовувати SageMaker замість Bedrock:</span>
+          <span class="b-sub">SageMaker використовується, коли датасаєнтисти навчають власні ML-моделі з нуля (Custom Algorithms: XGBoost, TensorFlow, PyTorch), управляють навчальними кластерами та розгортають інференс.</span></li>
+        <li><span class="b-title">SageMaker Endpoints:</span>
+          <span class="b-sub"><strong>Real-time</strong> (мілісекундні затримки), <strong>Serverless</strong> (для нерегулярного навантаження), <strong>Asynchronous</strong> (обробка великих файлів до 15 хв), <strong>Batch Transform</strong> (масова обробка всіх даних одночасно).</span></li>
+        <li><span class="b-title">SageMaker Canvas:</span>
+          <span class="b-sub">No-Code візуальний інтерфейс для бізнес-аналітиків, який будує прогнозні моделі без написання жодного рядка коду.</span></li>
+      </ul>
+      <div class="note tip"><span class="note-label">EXAM TIP</span>Для нерегулярного трафіку з періодами простою обирайте <strong>SageMaker Serverless Inference</strong>, щоб автоматично масштабуватися до 0 і не платити за простій EC2 інстансів.</div>
+    </div>
+    <div class="col banner-col">
+      <img src="assets/images/compute.jpg" alt="SageMaker Endpoints" class="img-card">
+    </div>
+  </div>
+  <footer class="section-tag">4. SageMaker</footer>
+</section>
+
+</div>
+
+<nav class="navbar">
+  <span class="brand">AWS SAA-C03 Feynman Study Deck</span>
+  <a class="hub-link" href="index.html">← Назад до Хабу</a>
+</nav>
+
+<script>
+  const deck = document.getElementById('deck');
+  const progress = document.getElementById('progress');
+  const slides = document.querySelectorAll('.slide');
+
+  deck.addEventListener('scroll', () => {
+    const scrollPos = deck.scrollTop;
+    const maxScroll = deck.scrollHeight - deck.clientHeight;
+    const pct = maxScroll > 0 ? (scrollPos / maxScroll) * 100 : 0;
+    progress.style.width = pct + '%';
+  });
+</script>
+</body>
+</html>
