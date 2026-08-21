@@ -7,7 +7,7 @@
 <style>
   :root {
     --dark: #1e1333; --dark2: #120924; --orange: #FF9900; --blue: #146EB4;
-    --purple: #9D5BD2; --cyan: #00F0FF; --red: #D13212; --green: #1D8102;
+    --purple: #9D5BD2; --cyan: #00F0FF; --red: #D13212; --green: #00E676;
     --bg-light: #F5F7FA; --text: #232323;
   }
   * { box-sizing: border-box; }
@@ -23,9 +23,17 @@
   .hero-banner-wrap {
     max-width: 900px; margin: 0 auto 20px; border-radius: 14px; overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+    cursor: zoom-in; position: relative;
   }
   .hero-banner-img {
-    width: 100%; height: auto; display: block;
+    width: 100%; height: auto; display: block; transition: transform 0.3s;
+  }
+  .hero-banner-wrap:hover .hero-banner-img {
+    transform: scale(1.02);
+  }
+  .zoom-hint {
+    position: absolute; bottom: 10px; right: 12px; background: rgba(0,0,0,0.7);
+    color: #fff; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; pointer-events: none;
   }
   header.hero h1 { font-size: 2.6rem; margin: 0 0 10px; background: linear-gradient(90deg, #FFFFFF, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   header.hero p { color: #AAB7C4; font-size: 1.05rem; max-width: 760px; margin: 0 auto; line-height: 1.5; }
@@ -45,9 +53,22 @@
     display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
   }
   .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.4); }
-  .card-img-thumb {
-    width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;
+  
+  .card-img-wrap {
+    position: relative; width: 100%; height: 140px; border-radius: 8px; overflow: hidden; margin-bottom: 12px;
+    cursor: zoom-in;
   }
+  .card-img-thumb {
+    width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;
+  }
+  .card-img-wrap:hover .card-img-thumb { transform: scale(1.05); }
+  .card-img-zoom-btn {
+    position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6);
+    color: white; border: none; border-radius: 4px; padding: 3px 6px; font-size: 0.75rem;
+    cursor: pointer; opacity: 0.85;
+  }
+  .card-img-zoom-btn:hover { opacity: 1; background: var(--orange); }
+
   .card-link { text-decoration: none; color: inherit; display: block; flex: 1; }
   .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .num { font-weight: 800; color: var(--orange); font-size: 1.2rem; }
@@ -64,14 +85,40 @@
   .chk { font-size: 0.8rem; color: #666; display: flex; align-items: center; gap: 6px; cursor: pointer; margin-top: auto; }
   .chk input { accent-color: var(--orange); width: 15px; height: 15px; }
 
+  /* Lightbox Modal */
+  .modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    max-width: 92vw; max-height: 86vh; border-radius: 12px; box-shadow: 0 0 30px rgba(0,240,255,0.4);
+    object-fit: contain; animation: zoomIn 0.25s ease-out;
+  }
+  .modal-caption {
+    color: #AAB7C4; font-size: 1.1rem; margin-top: 14px; text-align: center; font-weight: 600;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 30px; color: white; font-size: 40px;
+    font-weight: bold; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--orange); }
+
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
   footer { text-align: center; color: #889; font-size: 0.9rem; padding: 0 8vw 6vh; }
 </style>
 </head>
 <body>
 
 <header class="hero">
-  <div class="hero-banner-wrap">
+  <div class="hero-banner-wrap" onclick="openModal('assets/images/hero.jpg', 'AWS Cloud Architecture — Master Blueprint')">
     <img src="assets/images/hero.jpg" alt="AWS SAA-C03 Cloud Architecture" class="hero-banner-img">
+    <span class="zoom-hint">🔍 Клікніть щоб збільшити</span>
   </div>
   <h1>AWS SAA-C03 — Feynman Study Hub</h1>
   <p>Повний інтерактивний конспект для підготовки до іспиту <strong>AWS Certified Solutions Architect Associate</strong> (Оновлено до версії <strong>v48 / 2026</strong>).</p>
@@ -84,29 +131,12 @@
 
 <div class="grid">
 
-<!-- 20: NEW GenAI & Bedrock -->
-<div class="card is-ready" style="border: 2px solid var(--purple);">
-  <img src="assets/images/genai.jpg" alt="Generative AI & Bedrock" class="card-img-thumb">
-  <a class="card-link" href="GenAI_Bedrock_SAA_Feynman_Study_Deck.html" data-deck="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">
-    <div class="card-top">
-      <span class="num">20</span>
-      <span class="badge new">Новинка v48</span>
-    </div>
-    <h3>Generative AI & Bedrock</h3>
-    <p class="desc">Amazon Bedrock, Foundation Models, RAG, Knowledge Bases, Amazon Q, Kendra, SageMaker</p>
-    <div class="meta">
-      <span class="qcount">15+ нових питань</span>
-      <span class="domain">AI / Machine Learning</span>
-    </div>
-    <div class="mini-progress"><div class="mini-progress-fill" data-fill="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"></div></div>
-    <div class="mini-progress-label" data-label="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">0%</div>
-  </a>
-  <label class="chk"><input type="checkbox" data-check="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
-</div>
-
 <!-- 01: IAM -->
 <div class="card is-ready">
-  <img src="assets/images/security.jpg" alt="IAM Security" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/security.jpg', 'IAM & Security Architecture')">
+    <img src="assets/images/security.jpg" alt="IAM Security" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="IAM_SAA_Feynman_Study_Deck.html" data-deck="IAM_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">01</span>
@@ -126,7 +156,10 @@
 
 <!-- 02: EC2 -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="EC2 Compute" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'EC2 & Compute Infrastructure')">
+    <img src="assets/images/compute.jpg" alt="EC2 Compute" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="EC2_SAA_Feynman_Study_Deck.html" data-deck="EC2_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">02</span>
@@ -146,7 +179,10 @@
 
 <!-- 03: S3 -->
 <div class="card is-ready">
-  <img src="assets/images/databases.jpg" alt="S3 Storage" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/databases.jpg', 'S3 Object Storage & Data Vaults')">
+    <img src="assets/images/databases.jpg" alt="S3 Storage" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="S3_SAA_Feynman_Study_Deck.html" data-deck="S3_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">03</span>
@@ -166,7 +202,10 @@
 
 <!-- 04: RDS & Aurora -->
 <div class="card is-ready">
-  <img src="assets/images/databases.jpg" alt="RDS & Aurora" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/databases.jpg', 'RDS, Aurora & ElastiCache Caching')">
+    <img src="assets/images/databases.jpg" alt="RDS & Aurora" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html" data-deck="RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">04</span>
@@ -186,7 +225,10 @@
 
 <!-- 05: ELB & ASG -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="ELB & ASG" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'Elastic Load Balancing & Auto Scaling')">
+    <img src="assets/images/compute.jpg" alt="ELB & ASG" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="ELB_ASG_SAA_Feynman_Study_Deck.html" data-deck="ELB_ASG_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">05</span>
@@ -206,7 +248,10 @@
 
 <!-- 06: VPC -->
 <div class="card is-ready">
-  <img src="assets/images/networking.jpg" alt="VPC Networking" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/networking.jpg', 'Virtual Private Cloud (VPC) & Routing')">
+    <img src="assets/images/networking.jpg" alt="VPC Networking" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="VPC_SAA_Feynman_Study_Deck.html" data-deck="VPC_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">06</span>
@@ -226,7 +271,10 @@
 
 <!-- 07: Serverless -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="Serverless Lambda" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'Serverless Architecture & Lambda')">
+    <img src="assets/images/compute.jpg" alt="Serverless Lambda" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Serverless_SAA_Feynman_Study_Deck.html" data-deck="Serverless_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">07</span>
@@ -246,7 +294,10 @@
 
 <!-- 08: Security & Encryption -->
 <div class="card is-ready">
-  <img src="assets/images/security.jpg" alt="Security KMS" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/security.jpg', 'KMS Encryption & Security Services')">
+    <img src="assets/images/security.jpg" alt="Security KMS" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Security_Encryption_SAA_Feynman_Study_Deck.html" data-deck="Security_Encryption_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">08</span>
@@ -266,7 +317,10 @@
 
 <!-- 09: Messaging & Decoupling -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="Messaging SQS" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'Messaging & Event Decoupling')">
+    <img src="assets/images/compute.jpg" alt="Messaging SQS" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Messaging_SAA_Feynman_Study_Deck.html" data-deck="Messaging_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">09</span>
@@ -286,7 +340,10 @@
 
 <!-- 10: Storage Extras -->
 <div class="card is-ready">
-  <img src="assets/images/databases.jpg" alt="Storage Extras" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/databases.jpg', 'Storage Extras & Hybrid Storage')">
+    <img src="assets/images/databases.jpg" alt="Storage Extras" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Storage_Extras_SAA_Feynman_Study_Deck.html" data-deck="Storage_Extras_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">10</span>
@@ -306,7 +363,10 @@
 
 <!-- 11: Containers -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="Containers EKS" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'Containers & Kubernetes in AWS')">
+    <img src="assets/images/compute.jpg" alt="Containers EKS" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Containers_SAA_Feynman_Study_Deck.html" data-deck="Containers_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">11</span>
@@ -326,7 +386,10 @@
 
 <!-- 12: CloudFront & GA -->
 <div class="card is-ready">
-  <img src="assets/images/networking.jpg" alt="CloudFront GA" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/networking.jpg', 'CloudFront CDN & Global Accelerator')">
+    <img src="assets/images/networking.jpg" alt="CloudFront GA" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="CloudFront_GA_SAA_Feynman_Study_Deck.html" data-deck="CloudFront_GA_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">12</span>
@@ -346,7 +409,10 @@
 
 <!-- 13: Monitoring -->
 <div class="card is-ready">
-  <img src="assets/images/hero.jpg" alt="Monitoring CloudWatch" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/hero.jpg', 'CloudWatch, CloudTrail & Monitoring')">
+    <img src="assets/images/hero.jpg" alt="Monitoring CloudWatch" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Monitoring_SAA_Feynman_Study_Deck.html" data-deck="Monitoring_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">13</span>
@@ -366,7 +432,10 @@
 
 <!-- 14: Analytics -->
 <div class="card is-ready">
-  <img src="assets/images/genai.jpg" alt="Analytics Athena" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/genai.jpg', 'Data Analytics & Big Data Services')">
+    <img src="assets/images/genai.jpg" alt="Analytics Athena" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Analytics_SAA_Feynman_Study_Deck.html" data-deck="Analytics_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">14</span>
@@ -386,7 +455,10 @@
 
 <!-- 15: DR & Migrations -->
 <div class="card is-ready">
-  <img src="assets/images/hero.jpg" alt="Disaster Recovery" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/hero.jpg', 'Disaster Recovery & Migration Strategies')">
+    <img src="assets/images/hero.jpg" alt="Disaster Recovery" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="DR_Migration_SAA_Feynman_Study_Deck.html" data-deck="DR_Migration_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">15</span>
@@ -406,7 +478,10 @@
 
 <!-- 16: Route 53 -->
 <div class="card is-ready">
-  <img src="assets/images/networking.jpg" alt="Route 53 DNS" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/networking.jpg', 'Route 53 DNS Routing Policies')">
+    <img src="assets/images/networking.jpg" alt="Route 53 DNS" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Route53_SAA_Feynman_Study_Deck.html" data-deck="Route53_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">16</span>
@@ -426,7 +501,10 @@
 
 <!-- 17: EC2 Advanced -->
 <div class="card is-ready">
-  <img src="assets/images/compute.jpg" alt="EC2 Advanced" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/compute.jpg', 'EC2 Advanced Placement Groups & ENI')">
+    <img src="assets/images/compute.jpg" alt="EC2 Advanced" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="EC2_Advanced_SAA_Feynman_Study_Deck.html" data-deck="EC2_Advanced_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">17</span>
@@ -446,7 +524,10 @@
 
 <!-- 18: Other Services -->
 <div class="card is-ready">
-  <img src="assets/images/hero.jpg" alt="Other Services" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/hero.jpg', 'Cost Governance & Other AWS Services')">
+    <img src="assets/images/hero.jpg" alt="Other Services" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="Other_Services_SAA_Feynman_Study_Deck.html" data-deck="Other_Services_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">18</span>
@@ -466,7 +547,10 @@
 
 <!-- 19: Machine Learning -->
 <div class="card is-ready">
-  <img src="assets/images/genai.jpg" alt="Machine Learning" class="card-img-thumb">
+  <div class="card-img-wrap" onclick="openModal('assets/images/genai.jpg', 'AI & Machine Learning Services')">
+    <img src="assets/images/genai.jpg" alt="Machine Learning" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
   <a class="card-link" href="ML_Overview_SAA_Feynman_Study_Deck.html" data-deck="ML_Overview_SAA_Feynman_Study_Deck.html">
     <div class="card-top">
       <span class="num">19</span>
@@ -484,13 +568,43 @@
   <label class="chk"><input type="checkbox" data-check="ML_Overview_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
 </div>
 
+<!-- 20: Generative AI & Bedrock -->
+<div class="card is-ready" style="border: 2px solid var(--purple);">
+  <div class="card-img-wrap" onclick="openModal('assets/images/genai.jpg', 'Amazon Bedrock & Generative AI')">
+    <img src="assets/images/genai.jpg" alt="Generative AI & Bedrock" class="card-img-thumb">
+    <button class="card-img-zoom-btn">🔍 Збільшити</button>
+  </div>
+  <a class="card-link" href="GenAI_Bedrock_SAA_Feynman_Study_Deck.html" data-deck="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">
+    <div class="card-top">
+      <span class="num">20</span>
+      <span class="badge new">Новинка v48</span>
+    </div>
+    <h3>Generative AI & Bedrock</h3>
+    <p class="desc">Amazon Bedrock, Foundation Models, RAG, Knowledge Bases, Amazon Q, Kendra, SageMaker</p>
+    <div class="meta">
+      <span class="qcount">15+ нових питань</span>
+      <span class="domain">AI / Machine Learning</span>
+    </div>
+    <div class="mini-progress"><div class="mini-progress-fill" data-fill="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"></div></div>
+    <div class="mini-progress-label" data-label="GenAI_Bedrock_SAA_Feynman_Study_Deck.html">0%</div>
+  </a>
+  <label class="chk"><input type="checkbox" data-check="GenAI_Bedrock_SAA_Feynman_Study_Deck.html"> позначити пройденим</label>
+</div>
+
+</div>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="modal-close">&times;</span>
+  <img class="modal-content" id="modalImg" onclick="event.stopPropagation()">
+  <div class="modal-caption" id="modalCaption"></div>
 </div>
 
 <footer>Джерело тем: оновлений курс AWS Certified Solutions Architect Associate (Stephane Maarek v48) + офіційний AWS Exam Guide SAA-C03. Готово 20 з 20 тем.</footer>
 
 <script>
   const READY_FILES = [
-    'GenAI_Bedrock_SAA_Feynman_Study_Deck.html',
+    'IAM_SAA_Feynman_Study_Deck.html',
     'EC2_SAA_Feynman_Study_Deck.html',
     'S3_SAA_Feynman_Study_Deck.html',
     'RDS_Aurora_ElastiCache_SAA_Feynman_Study_Deck.html',
@@ -498,7 +612,6 @@
     'VPC_SAA_Feynman_Study_Deck.html',
     'Serverless_SAA_Feynman_Study_Deck.html',
     'Security_Encryption_SAA_Feynman_Study_Deck.html',
-    'IAM_SAA_Feynman_Study_Deck.html',
     'Messaging_SAA_Feynman_Study_Deck.html',
     'Storage_Extras_SAA_Feynman_Study_Deck.html',
     'Containers_SAA_Feynman_Study_Deck.html',
@@ -509,8 +622,26 @@
     'Route53_SAA_Feynman_Study_Deck.html',
     'EC2_Advanced_SAA_Feynman_Study_Deck.html',
     'Other_Services_SAA_Feynman_Study_Deck.html',
-    'ML_Overview_SAA_Feynman_Study_Deck.html'
+    'ML_Overview_SAA_Feynman_Study_Deck.html',
+    'GenAI_Bedrock_SAA_Feynman_Study_Deck.html'
   ];
+
+  function openModal(src, caption) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalCap = document.getElementById('modalCaption');
+    modal.classList.add('active');
+    modalImg.src = src;
+    modalCap.textContent = caption || '';
+  }
+
+  function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
 
   function getProgress() {
     try { return JSON.parse(localStorage.getItem('saa_progress') || '{}'); } catch(e) { return {}; }
