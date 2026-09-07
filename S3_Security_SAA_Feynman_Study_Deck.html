@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Amazon S3 — Безпека для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+
+  /* Lightbox Modal */
+  .modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    max-width: 92vw; max-height: 86vh; border-radius: 12px; box-shadow: 0 0 30px rgba(0,240,255,0.4);
+    object-fit: contain; animation: zoomIn 0.25s ease-out;
+  }
+  .modal-caption {
+    color: #AAB7C4; font-size: 1.1rem; margin-top: 14px; text-align: center; font-weight: 600;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 30px; color: white; font-size: 40px;
+    font-weight: bold; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--orange, #FF9900); }
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .deck-banner-wrap {
+    margin-top: 20px; max-width: 540px; border-radius: 10px; overflow: hidden;
+    cursor: zoom-in; box-shadow: 0 6px 18px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+  }
+  .deck-banner-img {
+    width: 100%; height: auto; display: block; transition: transform 0.2s;
+  }
+  .deck-banner-wrap:hover .deck-banner-img {
+    transform: scale(1.03);
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Amazon S3 — Безпека</h1>
+  <p class="subtitle">Шифрування, MFA Delete, Access Points, Object Lock, Pre-Signed URLs</p>
+  <p class="tag">Продовження базового S3-деку — фокус тільки на безпеці</p>
+</section>
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на схему → вивчи exam tips → поясни вголос без підглядання.</li><li>Базовий S3_SAA дек покриває основи (tiers, lifecycle, versioning). Тут — глибше про безпеку.</li></ol>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>4 методи шифрування S3</h1>
+  <p class="subtitle">SSE-S3, SSE-KMS, SSE-C, Client-Side — хто керує ключем?</p>
+</section>
+
+<section class="slide content">
+  <header><h2>SSE-S3 та SSE-KMS</h2><p class="eyebrow">Server-Side Encryption — два "керовані AWS" варіанти</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">SSE-S3</span><span class="b-sub">ключами повністю керує AWS. Шифрування AES-256. Увімкнено ЗА ЗАМОВЧУВАННЯМ для нових бакетів/об'єктів. Header: x-amz-server-side-encryption: AES256.</span></li><li><span class="b-title">SSE-KMS</span><span class="b-sub">ключами керує AWS KMS. Переваги: контроль юзера над ключем + аудит використання через CloudTrail. Header: x-amz-server-side-encryption: aws:kms.</span></li><li><span class="b-title">SSE-KMS Limitation</span><span class="b-sub">кожен upload/download викликає KMS API (GenerateDataKey/Decrypt) — рахується в KMS quota (5500-30000 req/s залежно від регіону). При масовому трафіку можна впертись у ліміт КVMS, а не S3.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Потрібен аудит хто і коли використовував ключ шифрування" → SSE-KMS (через CloudTrail). "Просте шифрування без зайвої складності" → SSE-S3 (дефолт).</div>
+  <footer class="section-tag">1. Шифрування S3</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>SSE-C та Client-Side Encryption</h2><p class="eyebrow">Коли AWS взагалі НЕ бачить твій ключ</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Метод</th><th>Хто шифрує</th><th>Де ключ</th><th>Вимога</th></tr></thead>
+    <tbody>
+      <tr><td>SSE-C</td><td>S3 (server-side), твій ключ</td><td>S3 НЕ зберігає твій ключ</td><td>HTTPS обов'язково, ключ в HTTP header КОЖНОГО запиту</td></tr>
+      <tr><td>Client-Side</td><td>Клієнт (ДО завантаження)</td><td>Повністю в тебе, S3 отримує вже зашифроване</td><td>S3 Client-Side Encryption Library</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>SSE-C — сервер ще шифрує/дешифрує (тому HTTPS обов'язковий, бо ключ летить у заголовку). Client-Side — сервер взагалі НІКОЛИ не бачить незашифровані дані.</div>
+  <footer class="section-tag">1. Шифрування S3</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Encryption in Transit + примусове шифрування</h2><p class="eyebrow">SSL/TLS та aws:SecureTransport</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">S3 має 2 endpoints: HTTP (не зашифровано) і HTTPS (зашифровано в дорозі).</span></li><li><span class="b-title">HTTPS обов'язковий для SSE-C (бо ключ передається в заголовку).</span></li><li><span class="b-title">Force Encryption in Transit</span><span class="b-sub">Bucket Policy з умовою aws:SecureTransport = false → Deny — примусово блокує будь-який HTTP-доступ до бакету.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Default Encryption" на бакеті (SSE-S3/KMS) шифрує дані НА ДИСКУ. Bucket Policy з aws:SecureTransport забезпечує шифрування В ДОРОЗІ. Це два РІЗНІ шари захисту — часто обидва потрібні одночасно.</div>
+  <footer class="section-tag">1. Шифрування S3</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Шифрування S3</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Компанія хоче аудит кожного разу, коли хтось розшифровує файл — який метод шифрування обереш?</li><li>Чому SSE-C вимагає HTTPS, а SSE-S3 — ні (хоча HTTPS все одно рекомендований)?</li><li>Як гарантувати, що НІХТО не зможе завантажити файл через незашифрований HTTP?</li></ol>
+  <footer class="section-tag">1. Шифрування S3</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>Контроль доступу та аудит</h1>
+  <p class="subtitle">MFA Delete, Access Logs, Pre-Signed URLs</p>
+</section>
+
+<section class="slide content">
+  <header><h2>MFA Delete</h2><p class="eyebrow">Другий фактор для НЕБЕЗПЕЧНИХ операцій</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Вимагає код з MFA-пристрою ДЛЯ: permanently delete object version, suspend Versioning.</span></li><li><span class="b-title">НЕ вимагає MFA для: enable Versioning, list deleted versions (тільки перегляд, не видалення).</span></li><li><span class="b-title">Передумова: Versioning МАЄ бути увімкнений на бакеті.</span></li><li><span class="b-title">Тільки root account (bucket owner) може вмикати/вимикати MFA Delete — навіть адміни з повними IAM-правами не можуть.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>MFA Delete захищає саме від "випадкового або зловмисного permanent delete" — не плутай з простим блокуванням запису чи звичайним IAM Deny.</div>
+  <footer class="section-tag">2. Контроль доступу</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>S3 Access Logs — і головна пастка</h2><p class="eyebrow">Логування ВСІХ запитів до бакету</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Кожен запит до S3 (авторизований чи ні, з будь-якого акаунта) логується в ІНШИЙ S3 bucket.</span></li><li><span class="b-title">Logging bucket МАЄ бути в тому самому регіоні, що й моніторований бакет.</span></li></ul></div>
+  <div class="note warn"><span class="note-label">ПАСТКА ІСПИТУ</span>НІКОЛИ не роби logging bucket = сам моніторований bucket! Це створює нескінченний "logging loop" — кожен PutObject логу генерує новий лог-запис, бакет росте експоненційно.</div>
+  <footer class="section-tag">2. Контроль доступу</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Pre-Signed URLs</h2><p class="eyebrow">Тимчасовий доступ до приватного об'єкта</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Генеруються через S3 Console, CLI, чи SDK.</span></li><li><span class="b-title">Термін дії: Console — 1-720 хвилин (до 12 годин). CLI — параметр --expires-in секундах, дефолт 3600с, максимум 604800с (~168 годин).</span></li><li><span class="b-title">Юзер з посиланням отримує ПРАВА ТОГО, ХТО ЗГЕНЕРУВАВ URL (для GET/PUT) — тимчасово й обмежено конкретним об'єктом.</span></li><li><span class="b-title">Use cases: платне відео тільки для залогінених юзерів; динамічний список дозволених завантажень; тимчасовий upload у конкретне місце бакету.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Pre-Signed URL "успадковує" права генератора — якщо в генератора відібрати IAM-права ПІСЛЯ генерації URL, посилання теж перестане працювати (permission real-time, не "заморожена" на момент генерації).</div>
+  <footer class="section-tag">2. Контроль доступу</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Access Control</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Чому MFA Delete не може захистити від видалення бакету, якщо Versioning не увімкнений?</li><li>Опиши, чому "Logging Loop" — небезпечна помилка конфігурації, а не просто незручність.</li><li>Хочеш дати доступ на завантаження premium-відео тільки залогіненим юзерам на 15 хвилин — що використаєш?</li></ol>
+  <footer class="section-tag">2. Контроль доступу</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>Compliance та керування доступом на масштабі</h1>
+  <p class="subtitle">Object Lock, Glacier Vault Lock, Access Points</p>
+</section>
+
+<section class="slide content">
+  <header><h2>S3 Object Lock vs Glacier Vault Lock</h2><p class="eyebrow">WORM (Write Once Read Many) для compliance</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Критерій</th><th>S3 Object Lock</th><th>Glacier Vault Lock</th></tr></thead>
+    <tbody>
+      <tr><td>Передумова</td><td>Versioning увімкнений</td><td>—</td></tr>
+      <tr><td>Режим Compliance</td><td>НІХТО (навіть root) не може видалити/скоротити період</td><td>Політика блокується назавжди, не редагується</td></tr>
+      <tr><td>Режим Governance</td><td>Більшість не може, але є юзери зі спецправами</td><td>—</td></tr>
+      <tr><td>Legal Hold</td><td>Захист БЕЗ терміну, окремо від Retention Period, можна вільно знімати (s3:PutObjectLegalHold)</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Regulatory compliance, дані НЕ ПОВИННІ бути видалені навіть адміном" → Compliance mode. "Тимчасовий захист, який можна зняти при потребі" → Governance mode або Legal Hold.</div>
+  <footer class="section-tag">3. Compliance</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>S3 Access Points</h2><p class="eyebrow">Спрощене керування доступом на масштабі</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Замість однієї величезної Bucket Policy на весь бакет — окремі Access Points, кожен зі своєю політикою й DNS-іменем.</span></li><li><span class="b-title">Приклад: Finance-команда отримує Access Point тільки на /finance/* префікс, Sales — тільки на /sales/*, Analytics — read-only на весь бакет.</span></li><li><span class="b-title">VPC Origin</span><span class="b-sub">Access Point можна обмежити доступом ТІЛЬКИ з конкретного VPC — вимагає VPC Endpoint (Gateway чи Interface) з політикою, що дозволяє доступ до бакету й Access Point.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Access Points вирішують проблему "одна гігантська Bucket Policy стає некерованою при рості кількості команд/відділів" — розбиваєш на менші, незалежно керовані шматки.</div>
+  <footer class="section-tag">3. Compliance</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Object Lock & Access Points</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Регулятор вимагає, щоб фінансові документи НЕ МОГЛИ бути видалені навіть найвищим адміном протягом 7 років — що налаштуєш?</li><li>Компанія має 10 відділів, кожен зі своїм префіксом у ОДНОМУ S3 bucket — як спростити керування доступом?</li></ol>
+  <footer class="section-tag">3. Compliance</footer>
+</section>
+
+<section class="slide cover closing">
+  <h1>Підсумок: S3 Security одним поглядом</h1>
+  <ul class="recap"><li>4 шифрування: SSE-S3 (дефолт, AWS керує) → SSE-KMS (аудит через CloudTrail, KMS quota ліміти) → SSE-C (твій ключ, HTTPS обов'язково) → Client-Side (S3 взагалі не бачить plaintext)</li><li>Encryption at rest (Default Encryption) ≠ Encryption in transit (aws:SecureTransport Bucket Policy) — різні шари</li><li>MFA Delete захищає permanent delete + suspend versioning, керується ТІЛЬКИ root-акаунтом</li><li>НІКОЛИ logging bucket = моніторований bucket (logging loop)</li><li>Pre-Signed URL = тимчасові права генератора. Object Lock Compliance mode = навіть root не видалить</li><li>Access Points = дроблення однієї Bucket Policy на керовані шматки, з опцією VPC-only доступу</li></ul>
+  <p class="tag">S3 Security — глибока тема з багатьма деталями-пастками. Особливо звертай увагу на різницю Compliance vs Governance mode.</p>
+</section>
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 17</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="modal-close">&times;</span>
+  <img class="modal-content" id="modalImg" onclick="event.stopPropagation()">
+  <div class="modal-caption" id="modalCaption"></div>
+</div>
+
+<script>
+  function openModal(src, caption) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const modalCap = document.getElementById("modalCaption");
+    if (modal && modalImg) {
+      modal.classList.add("active");
+      modalImg.src = src;
+      if (modalCap) modalCap.textContent = caption || "";
+    }
+  }
+  function closeModal() {
+    const modal = document.getElementById("imageModal");
+    if (modal) modal.classList.remove("active");
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Архітектурні патерни, Beanstalk, CloudFormation для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+
+  /* Lightbox Modal */
+  .modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    max-width: 92vw; max-height: 86vh; border-radius: 12px; box-shadow: 0 0 30px rgba(0,240,255,0.4);
+    object-fit: contain; animation: zoomIn 0.25s ease-out;
+  }
+  .modal-caption {
+    color: #AAB7C4; font-size: 1.1rem; margin-top: 14px; text-align: center; font-weight: 600;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 30px; color: white; font-size: 40px;
+    font-weight: bold; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--orange, #FF9900); }
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .deck-banner-wrap {
+    margin-top: 20px; max-width: 540px; border-radius: 10px; overflow: hidden;
+    cursor: zoom-in; box-shadow: 0 6px 18px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+  }
+  .deck-banner-img {
+    width: 100%; height: auto; display: block; transition: transform 0.2s;
+  }
+  .deck-banner-wrap:hover .deck-banner-img {
+    transform: scale(1.03);
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Архітектурні патерни, Elastic Beanstalk та CloudFormation</h1>
+  <p class="subtitle">Classic/More Solutions Architecture + Cost Tools</p>
+  <p class="tag">Як думає Solutions Architect: еволюція архітектури крок за кроком</p>
+</section>
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на еволюцію архітектури → вивчи exam tips → поясни вголос без підглядання.</li><li>Ця тема — "збірна солянка" з практичних кейсів курсу, яких бракувало: еволюція архітектур, Beanstalk, CloudFormation, Cost tools.</li></ol>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>Еволюція архітектури: 3 кейси</h1>
+  <p class="subtitle">Як мислить Solutions Architect — від простого до production-ready</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Кейс 1: Stateless-застосунок (WhatIsTheTime.com)</h2><p class="eyebrow">Шлях від одного EC2 до відмовостійкої системи</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Крок 1: один публічний EC2 з Elastic IP.</span><span class="b-sub">Просто, але єдина точка відмови (SPOF) і downtime при апгрейді.</span></li><li><span class="b-title">Крок 2: вертикальне масштабування (більший instance type).</span><span class="b-sub">Все ще downtime під час апгрейду, все ще SPOF.</span></li><li><span class="b-title">Крок 3: горизонтальне масштабування — кілька EC2 без Elastic IP, Route 53 A-record.</span><span class="b-sub">Проблема: якщо інстанс зникає, DNS TTL (1 год) все ще вказує на мертву IP.</span></li><li><span class="b-title">Крок 4: додаємо Load Balancer.</span><span class="b-sub">ELB абстрагує список живих інстансів — DNS вказує на ELB, а не на конкретні EC2. Це і є фінальна production-ready форма для stateless-застосунку.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Якщо в сценарії згадують "downtime при масштабуванні" чи "мертві DNS-записи після видалення інстансу" — відповідь майже завжди ELB + ASG, а не ручне управління Route 53.</div>
+  <footer class="section-tag">1. Еволюція архітектури</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Кейс 2: Stateful-застосунок (MyClothes.com)</h2><p class="eyebrow">Проблема сесій за Load Balancer</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Проблема: користувач логіниться на Instance A, наступний запит ELB спрямовує на Instance B — сесія "загублена".</span></li><li><span class="b-title">Погане рішення: Sticky Sessions (ELB завжди спрямовує того ж юзера на той самий інстанс).</span><span class="b-sub">Працює, але нерівномірне навантаження і втрата сесії при падінні конкретного інстансу.</span></li><li><span class="b-title">Правильне рішення: винести стан (сесії) ЗА МЕЖІ інстансу — в ElastiCache (Redis/Memcached) або DynamoDB.</span><span class="b-sub">Тепер будь-який інстанс може обслужити будь-якого юзера — справжня stateless-архітектура на рівні compute.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Sticky sessions" в сценарії — це майже завжди СИГНАЛ проблеми, яку правильна відповідь вирішує через зовнішнє сховище сесій (ElastiCache/DynamoDB), а не через "увімкнути Sticky Sessions".</div>
+  <footer class="section-tag">1. Еволюція архітектури</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Кейс 3: Спільне сховище (MyWordPress.com)</h2><p class="eyebrow">EBS vs EFS для розподілених застосунків</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Проблема: юзер завантажує картинку на Instance A, інший юзер хоче побачити її через Instance B — але картинка лежить тільки на EBS-диску Instance A.</span></li><li><span class="b-title">EBS — прив'язаний до ОДНОГО EC2 в ОДНІЙ AZ.</span><span class="b-sub">Ідеально для single-instance застосунків, НЕ підходить для розподілених.</span></li><li><span class="b-title">EFS — мережева файлова система, монтується одночасно на БАГАТО EC2 в РІЗНИХ AZ.</span><span class="b-sub">Розв'язує проблему спільного доступу до файлів для горизонтально масштабованого застосунку.</span></li></ul></div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Aurora (Multi-AZ + Read Replicas) для БД + EFS для спільних файлів + ElastiCache для сесій = класична "правильна" розподілена архітектура на іспиті.</div>
+  <footer class="section-tag">1. Еволюція архітектури</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Швидке розгортання застосунків</h2><p class="eyebrow">Golden AMI vs User Data vs Snapshot</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Ресурс</th><th>Спосіб пришвидшити запуск</th></tr></thead>
+    <tbody>
+      <tr><td>EC2 — Golden AMI</td><td>Все встановлено заздалегідь в образі — швидкий старт, але образ треба оновлювати</td></tr>
+      <tr><td>EC2 — User Data</td><td>Bootstrap-скрипт при старті — гнучко, але повільніше (встановлення "на льоту")</td></tr>
+      <tr><td>EC2 — Hybrid</td><td>Golden AMI + User Data для динамічної частини (підхід Elastic Beanstalk)</td></tr>
+      <tr><td>RDS</td><td>Відновлення зі snapshot — база вже має схему й дані готовими</td></tr>
+      <tr><td>EBS</td><td>Відновлення зі snapshot — диск вже відформатований і з даними</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <footer class="section-tag">1. Еволюція архітектури</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Еволюція архітектури</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Чому Sticky Sessions — "пастка", а не рішення проблеми втрати сесій?</li><li>У якому кейсі EBS буде ПРАВИЛЬНОЮ відповіддю, а EFS — неправильною?</li><li>Опиши повний шлях "What is the time" від одного EC2 до фінальної ELB+ASG архітектури.</li></ol>
+  <footer class="section-tag">1. Еволюція архітектури</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>AWS Elastic Beanstalk</h1>
+  <p class="subtitle">Developer-centric спосіб деплою — PaaS поверх EC2/ASG/ELB/RDS</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Що таке Elastic Beanstalk?</h2><p class="eyebrow">Проблема, яку він вирішує</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Розробники хочуть, щоб їхній код просто запрацював — без ручного налаштування EC2/ASG/ELB/RDS кожного разу.</span></li><li><span class="b-title">Beanstalk — керований сервіс: автоматично налаштовує capacity provisioning, load balancing, scaling, health monitoring.</span></li><li><span class="b-title">Розробник відповідає ТІЛЬКИ за код застосунку — решту бере на себе Beanstalk.</span></li><li><span class="b-title">Сам Beanstalk безкоштовний — платиш лише за underlying-ресурси (EC2, RDS тощо).</span></li><li><span class="b-title">Все ще маєш ПОВНИЙ контроль над конфігурацією, якщо потрібно щось налаштувати вручну.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Beanstalk НЕ приховує інфраструктуру — це "developer view" НАД тими самими EC2/ASG/ELB, які ти й так знаєш. Не плутай з повністю serverless Lambda.</div>
+  <footer class="section-tag">2. Elastic Beanstalk</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Компоненти та Web/Worker Tier</h2><p class="eyebrow">Application → Version → Environment</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Application</span><span class="b-sub">колекція компонентів Beanstalk (environments, versions, configurations).</span></li><li><span class="b-title">Application Version</span><span class="b-sub">конкретна ітерація коду застосунку.</span></li><li><span class="b-title">Environment</span><span class="b-sub">набір AWS-ресурсів, що виконують ОДНУ версію застосунку одночасно. Можна мати кілька середовищ (dev/test/prod).</span></li><li><span class="b-title">Web Server Tier</span><span class="b-sub">стандартний ALB + ASG для обробки HTTP-запитів.</span></li><li><span class="b-title">Worker Tier</span><span class="b-sub">ASG, що витягує повідомлення з SQS — для фонової/асинхронної обробки, масштабується за кількістю повідомлень у черзі.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Web Tier може НАПРЯМУ слати повідомлення у SQS чергу Worker Tier — класичний decoupling-патерн (той самий принцип, що й SQS/SNS у Messaging-деку).</div>
+  <footer class="section-tag">2. Elastic Beanstalk</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Deployment Modes</h2><p class="eyebrow">Single Instance vs High Availability</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Режим</th><th>Коли використовувати</th><th>RDS</th></tr></thead>
+    <tbody>
+      <tr><td>Single Instance</td><td>Dev/тестування — дешево і просто, Elastic IP</td><td>RDS Master в тій самій AZ</td></tr>
+      <tr><td>High Availability + ALB</td><td>Production — ASG у кількох AZ за ALB</td><td>RDS Master + Standby (Multi-AZ)</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:2vh"><strong>Підтримувані платформи:</strong> Go, Java SE, Java+Tomcat, .NET Core/Windows, Node.js, PHP, Python, Ruby, Docker (single/multi-container, preconfigured)</p>
+  </div>
+  <footer class="section-tag">2. Elastic Beanstalk</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Elastic Beanstalk</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Чим Web Server Tier відрізняється від Worker Tier — коли обереш кожен?</li><li>Чому "Single Instance" режим підходить тільки для dev, а не production?</li></ol>
+  <footer class="section-tag">2. Elastic Beanstalk</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>AWS CloudFormation</h1>
+  <p class="subtitle">Infrastructure as Code — декларативний опис усієї інфраструктури</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Що таке CloudFormation і навіщо</h2><p class="eyebrow">Декларативний, не процедурний підхід</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">В шаблоні ти ОПИСУЄШ бажаний стан ("хочу 2 EC2, security group, S3 bucket, load balancer") — CloudFormation сам створює все у правильному порядку.</span></li><li><span class="b-title">Infrastructure as Code</span><span class="b-sub">жодних ручних змін через консоль — усі зміни проходять через код і код-рев'ю.</span></li><li><span class="b-title">Cost-переваги</span><span class="b-sub">кожен ресурс у стеку тегується автоматично — легко бачити вартість стеку. Можна оцінити вартість ЗАЗДАЛЕГІДЬ по шаблону. Dev-стрателгія: автоматично видаляти стек о 17:00 і відтворювати о 8:00 — економія.</span></li><li><span class="b-title">Продуктивність</span><span class="b-sub">можна знищити і відтворити всю інфраструктуру миттєво. Автоматична генерація діаграми зі структури шаблону.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Автоматизоване видалення dev-середовища вночі для економії" — класичний CloudFormation exam-сценарій для Cost Optimization домену.</div>
+  <footer class="section-tag">3. CloudFormation</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>CloudFormation Service Role</h2><p class="eyebrow">Принцип найменших привілеїв для деплою</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">IAM Role, яка дозволяє CloudFormation створювати/оновлювати/видаляти ресурси стеку ВІД СВОГО ІМЕНІ.</span></li><li><span class="b-title">Use case: даєш юзеру право створити/оновити стек, НЕ даючи йому прямих прав на самі ресурси всередині (EC2, S3 тощо).</span></li><li><span class="b-title">Юзер повинен мати `iam:PassRole` — щоб "передати" цю роль CloudFormation.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Це той самий принцип least privilege, що й Permission Boundaries з Advanced Identity — розділяй "хто може ЗАПУСТИТИ деплой" від "які права МАЄ сам деплой".</div>
+  <footer class="section-tag">3. CloudFormation</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: CloudFormation</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Чому "декларативний" підхід кращий за ручне клацання в консолі для production-інфраструктури?</li><li>Юзер має право створити CloudFormation-стек, але не має прямих прав на EC2. Як стек все одно створить EC2-інстанси?</li></ol>
+  <footer class="section-tag">3. CloudFormation</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 4</h2>
+  <h1>Cost Optimization Tools</h1>
+  <p class="subtitle">Cost Explorer, Savings Plans, Anomaly Detection — окремий домен іспиту (20%)</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Cost Explorer & AWS Cost Anomaly Detection</h2><p class="eyebrow">Бачити витрати ДО того, як вони стали проблемою</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Cost Explorer</span><span class="b-sub">візуалізує й аналізує витрати за часом — по акаунтах, по місяцях/годинах, до рівня конкретного ресурсу.</span></li><li><span class="b-title">Допомагає обрати оптимальний Savings Plan (альтернатива Reserved Instances з більшою гнучкістю по instance family/region).</span></li><li><span class="b-title">Прогнозує використання на 18 місяців наперед на основі історії.</span></li><li><span class="b-title">Cost Anomaly Detection</span><span class="b-sub">ML автоматично вчиться на твоїх історичних витратах і виявляє незвичні сплески БЕЗ ручного налаштування порогів.</span></li><li><span class="b-title">Моніторить по сервісах, member accounts, cost allocation tags — сповіщає через SNS з root-cause аналізом.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"Виявити незвичний сплеск витрат автоматично, без ручних порогів" → Cost Anomaly Detection (ML). "Проаналізувати й спрогнозувати витрати вручну" → Cost Explorer.</div>
+  <footer class="section-tag">4. Cost Optimization</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Cost Tools</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Чим Cost Anomaly Detection відрізняється від простого CloudWatch Billing Alarm з фіксованим порогом?</li><li>Як CloudFormation-теги допомагають Cost Explorer показати вартість конкретного стеку?</li></ol>
+  <footer class="section-tag">4. Cost Optimization</footer>
+</section>
+
+<section class="slide cover closing">
+  <h1>Підсумок: Архітектурні патерни одним поглядом</h1>
+  <ul class="recap"><li>Еволюція: один EC2 → вертикальне масштабування → горизонтальне + ELB → сесії ЗА МЕЖАМИ інстансу (ElastiCache) → спільне сховище (EFS замість EBS)</li><li>Sticky Sessions — сигнал проблеми, не рішення. Правильне рішення — зовнішнє сховище стану</li><li>Elastic Beanstalk = developer-view над EC2/ASG/ELB/RDS. Web Tier (HTTP) vs Worker Tier (SQS-based)</li><li>CloudFormation = Infrastructure as Code, декларативний, Service Role для розділення "хто деплоїть" від "які права має деплой"</li><li>Cost Explorer (аналіз+прогноз) + Cost Anomaly Detection (ML-виявлення сплесків) — інструменти домену Cost Optimization</li></ul>
+  <p class="tag">Ці кейси показують МИСЛЕННЯ архітектора — саме це тестує іспит через сценарні питання, а не просто знання окремих сервісів.</p>
+</section>
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 21</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="modal-close">&times;</span>
+  <img class="modal-content" id="modalImg" onclick="event.stopPropagation()">
+  <div class="modal-caption" id="modalCaption"></div>
+</div>
+
+<script>
+  function openModal(src, caption) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const modalCap = document.getElementById("modalCaption");
+    if (modal && modalImg) {
+      modal.classList.add("active");
+      modalImg.src = src;
+      if (modalCap) modalCap.textContent = caption || "";
+    }
+  }
+  function closeModal() {
+    const modal = document.getElementById("imageModal");
+    if (modal) modal.classList.remove("active");
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+</script>
+
+</body>
+</html>
