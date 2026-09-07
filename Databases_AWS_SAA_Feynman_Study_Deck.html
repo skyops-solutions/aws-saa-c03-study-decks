@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Бази даних AWS (DynamoDB) для AWS SAA-C03 — Feynman Study Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+  :root {
+    --dark: #232F3E;
+    --dark2: #1b2530;
+    --orange: #FF9900;
+    --blue: #146EB4;
+    --red: #D13212;
+    --green: #1D8102;
+    --bg-light: #F5F7FA;
+    --text: #232323;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+    background: #14181f;
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+  .deck {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    scroll-snap-align: start;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 6vh 8vw;
+    background: white;
+  }
+  .slide.cover, .slide.intro, .slide.section-title {
+    background: linear-gradient(160deg, var(--dark), var(--dark2));
+    color: white;
+    align-items: center;
+    text-align: center;
+  }
+  .slide.cover .accent-line, .slide.section-title .accent-line {
+    width: 80px; height: 5px; background: var(--orange); margin-bottom: 28px; border-radius: 3px;
+  }
+  .slide.cover h1 { font-size: 3.2rem; margin: 0 0 14px; }
+  .slide.cover .subtitle { color: var(--orange); font-size: 1.3rem; margin: 0 0 10px; }
+  .slide.cover .tag { color: #AAB7C4; font-size: 1rem; max-width: 700px; }
+  .slide.section-title .section-num { color: var(--orange); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .slide.section-title h1 { font-size: 3rem; margin: 0 0 14px; }
+  .slide.section-title .subtitle { color: #AAB7C4; font-size: 1.2rem; }
+  .slide.intro h2 { font-size: 2rem; margin-bottom: 40px; }
+  .steps { text-align: left; max-width: 760px; font-size: 1.15rem; line-height: 1.9; }
+  .steps li { margin-bottom: 14px; }
+  .tip-inline { background: var(--orange); color: var(--dark); padding: 1px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+
+  .slide.content header, .slide.self-test header {
+    background: var(--dark);
+    margin: -6vh -8vw 4vh;
+    padding: 4vh 8vw 2vh;
+  }
+  .slide.content h2, .slide.self-test h2 { color: white; margin: 0 0 6px; font-size: 2rem; }
+  .slide.content .eyebrow, .slide.self-test .eyebrow { color: var(--orange); margin: 0; font-size: 1.05rem; }
+
+  .bullets { list-style: none; margin: 0; padding: 0; }
+  .bullets li { margin-bottom: 16px; }
+  .bullets li::before { content: "•"; color: var(--orange); font-weight: bold; margin-right: 10px; }
+  .b-title { font-size: 1.08rem; font-weight: 600; }
+  .b-sub { display: block; margin: 4px 0 0 20px; font-size: 0.92rem; color: #555; font-weight: 400; }
+
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .col { flex: 1.1; }
+  .col.img-col { flex: 0.9; display: flex; align-items: center; justify-content: center; }
+  .icon-diagram { max-width: 100%; max-height: 46vh; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  thead th { background: var(--dark); color: white; text-align: left; padding: 10px 12px; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #e2e6ea; }
+  tbody tr:nth-child(even) { background: var(--bg-light); }
+
+  .note {
+    margin-top: 3vh; padding: 14px 18px; border-radius: 8px; font-size: 0.98rem; line-height: 1.5;
+  }
+  .note.tip, .note.warn { background: #FDECEA; color: #7a1c0e; }
+  .note.good { background: #E7F3E6; color: #164a0a; }
+  .note-label { display: block; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+  .note.tip .note-label, .note.warn .note-label { color: var(--red); }
+  .note.good .note-label { color: var(--green); }
+
+  .section-tag {
+    position: absolute; bottom: 3vh; right: 8vw; color: #999; font-size: 0.85rem;
+  }
+
+  .slide.self-test .prompt { font-weight: 600; font-size: 1.1rem; margin-bottom: 20px; }
+  .test-list { font-size: 1.1rem; line-height: 2; padding-left: 24px; }
+  .test-list li { margin-bottom: 10px; }
+  .test-list li::marker { color: var(--orange); font-weight: 700; }
+
+  .slide.closing h1 { font-size: 2.3rem; margin-bottom: 30px; }
+  .recap { list-style: none; padding: 0; text-align: left; max-width: 800px; font-size: 1.1rem; line-height: 1.8; }
+  .recap li { margin-bottom: 14px; }
+  .recap li::before { content: "▸ "; color: var(--orange); }
+
+  .navbar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; background: rgba(20,24,31,0.92); color: #ccc;
+    font-size: 0.85rem; z-index: 10;
+  }
+  .navbar .brand { opacity: 0.8; }
+  .navbar .hub-link { color: var(--orange); text-decoration: none; font-weight: 700; }
+  .navbar .hub-link:hover { text-decoration: underline; }
+  .navbar .controls { display: flex; align-items: center; gap: 14px; }
+  .navbar button {
+    background: var(--orange); border: none; color: var(--dark); font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  .navbar button:hover { opacity: 0.9; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--orange); z-index: 10; transition: width 0.15s; }
+
+  @media print {
+    .navbar, .progress { display: none !important; }
+    .deck { overflow: visible; height: auto; }
+    .slide { height: 100vh; page-break-after: always; scroll-snap-align: none; }
+  }
+  @media (max-width: 900px) {
+    .cols { flex-direction: column; }
+    .slide.cover h1, .slide.section-title h1 { font-size: 2.1rem; }
+  }
+
+
+  /* Lightbox Modal */
+  .modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    max-width: 92vw; max-height: 86vh; border-radius: 12px; box-shadow: 0 0 30px rgba(0,240,255,0.4);
+    object-fit: contain; animation: zoomIn 0.25s ease-out;
+  }
+  .modal-caption {
+    color: #AAB7C4; font-size: 1.1rem; margin-top: 14px; text-align: center; font-weight: 600;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 30px; color: white; font-size: 40px;
+    font-weight: bold; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--orange, #FF9900); }
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .deck-banner-wrap {
+    margin-top: 20px; max-width: 540px; border-radius: 10px; overflow: hidden;
+    cursor: zoom-in; box-shadow: 0 6px 18px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+  }
+  .deck-banner-img {
+    width: 100%; height: auto; display: block; transition: transform 0.2s;
+  }
+  .deck-banner-wrap:hover .deck-banner-img {
+    transform: scale(1.03);
+  }
+
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide cover">
+  <div class="accent-line"></div>
+  <h1>Бази даних AWS: як обрати та DynamoDB</h1>
+  <p class="subtitle">Databases in AWS — розділ курсу, якого бракувало в наборі деків</p>
+  <p class="tag">DynamoDB — один з найчастіше тестованих сервісів на іспиті SAA-C03</p>
+</section>
+
+<section class="slide intro">
+  <h2>Метод Фейнмана — нагадування</h2>
+  <ol class="steps"><li>Прочитай аналогію → подивись на таблицю → вивчи exam tips → поясни вголос без підглядання.</li><li>Ця тема НЕ дублює RDS/Aurora/ElastiCache — тут фокус на NoSQL (DynamoDB) і фреймворк вибору БД.</li></ol>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 1</h2>
+  <h1>Як обрати правильну базу даних</h1>
+  <p class="subtitle">Фреймворк рішень — найчастіша "прихована" частина сценарних питань</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Питання, які треба поставити (аналогія)</h2><p class="eyebrow">Уяви, що ти лікар, а не інженер</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Уяви лікаря, який спершу питає симптоми, а не одразу виписує ліки.</span><span class="b-sub">Так само з БД: спершу питання про workload, а не одразу "бери DynamoDB бо модно".</span></li><li><span class="b-title">Read-heavy, write-heavy чи balanced? Throughput стабільний чи флуктуює протягом дня?</span></li><li><span class="b-title">Скільки даних і як довго зберігати? Середній розмір об'єкта? Як до них звертаються?</span></li><li><span class="b-title">Durability даних? Де "джерело правди" (source of truth)?</span></li><li><span class="b-title">Вимоги до latency? Скільки одночасних юзерів?</span></li><li><span class="b-title">Модель даних: JOIN-и потрібні? Структуровані/напівструктуровані? Строга схема чи гнучкість?</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Якщо в сценарії згадують "JOIN-и" і "складні транзакції" — це майже завжди RDBMS (RDS/Aurora). Якщо "мільйони дрібних JSON-документів, milliseconds latency" — це DynamoDB.</div>
+  <footer class="section-tag">1. Як обрати БД</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Типи баз даних на AWS</h2><p class="eyebrow">Таблиця для швидкого розпізнавання сценарію</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Тип</th><th>Сервіс</th><th>Коли обирати</th></tr></thead>
+    <tbody>
+      <tr><td>RDBMS (SQL / OLTP)</td><td>RDS, Aurora</td><td>Потрібні JOIN-и, ACID-транзакції, строга схема</td></tr>
+      <tr><td>NoSQL Key/Value</td><td>DynamoDB</td><td>Мільйони дрібних документів, milliseconds latency, serverless</td></tr>
+      <tr><td>NoSQL In-memory</td><td>ElastiCache</td><td>Кеш, session store, sub-millisecond latency</td></tr>
+      <tr><td>Object Store</td><td>S3 / Glacier</td><td>Великі об'єкти, бекапи, статичні файли</td></tr>
+      <tr><td>Data Warehouse (OLAP)</td><td>Redshift, Athena, EMR</td><td>SQL-аналітика, BI-звіти по великих обсягах</td></tr>
+      <tr><td>Search</td><td>OpenSearch</td><td>Full-text пошук, неструктуровані дані (JSON)</td></tr>
+      <tr><td>Graph</td><td>Amazon Neptune</td><td>Зв'язки між даними — соцмережі, fraud detection</td></tr>
+      <tr><td>Ledger</td><td>Amazon QLDB</td><td>Незмінний, криптографічно перевірюваний журнал транзакцій</td></tr>
+      <tr><td>Time Series</td><td>Amazon Timestream</td><td>IoT-дані, метрики з часовими мітками</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note good"><span class="note-label">ЗАПАМ'ЯТАЙ</span>Це — та сама "матриця" яку іспит очікує, що ти тримаєш у голові при читанні будь-якого сценарію з БД.</div>
+  <footer class="section-tag">1. Як обрати БД</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Вибір БД</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Компанія хоче зберігати граф "хто кого фоловить" у соцмережі — яку БД обереш і чому?</li><li>Потрібен незмінний журнал фінансових транзакцій з криптографічним підтвердженням — яка БД?</li><li>Чому "просто бери DynamoDB для всього" — неправильний підхід на іспиті?</li></ol>
+  <footer class="section-tag">1. Як обрати БД</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 2</h2>
+  <h1>Amazon DynamoDB</h1>
+  <p class="subtitle">Serverless NoSQL з latency в мілісекундах</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Що таке DynamoDB? (аналогія)</h2><p class="eyebrow">Проста аналогія</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Уяви шафу з шухлядами, де на кожній шухляді написаний унікальний ярлик (Partition Key) — щоб миттєво знайти потрібну шухляду, не перебираючи всі.</span></li><li><span class="b-title">DynamoDB — власна (proprietary) технологія AWS, НЕ open-source, повністю serverless NoSQL база.</span></li><li><span class="b-title">На відміну від RDS, тут немає інстансу, який ти адмініструєш — тільки таблиця, ключі та capacity.</span></li><li><span class="b-title">Дані зберігаються як JSON-подібні документи (Items), без строгої схеми для не-ключових атрибутів.</span></li><li><span class="b-title">Highly Available за замовчуванням, Multi-AZ "з коробки" — на відміну від RDS, де Multi-AZ треба вмикати явно.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>DynamoDB може ПОВНІСТЮ замінити ElastiCache як key/value store для session data — через TTL-фічу. Це часта пастка вибору "правильної" відповіді.</div>
+  <footer class="section-tag">2. Amazon DynamoDB</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>Capacity, DAX, Streams, Global Tables</h2><p class="eyebrow">4 речі, які точно спитають на іспиті</p></header>
+  <div class="body"><ul class="bullets"><li><span class="b-title">Capacity Modes: Provisioned (з опційним auto-scaling) АБО On-Demand (плати за фактичне використання, нуль планування).</span></li><li><span class="b-title">DAX (DynamoDB Accelerator)</span><span class="b-sub">окремий in-memory кеш-кластер ПЕРЕД DynamoDB — знижує latency до мікросекунд для read-важких навантажень.</span></li><li><span class="b-title">DynamoDB Streams</span><span class="b-sub">впорядкована послідовність змін у таблиці — інтегрується з Lambda чи Kinesis Data Streams для event-driven обробки.</span></li><li><span class="b-title">Global Tables</span><span class="b-sub">active-active мульти-регіональна реплікація — запис в будь-якому регіоні реплікується у всі інші.</span></li><li><span class="b-title">Backup: автоматичні бекапи до 35 днів з PITR (point-in-time restore), або on-demand бекапи без ліміту.</span></li></ul></div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>"DAX" ≠ "ElastiCache перед DynamoDB" — це РІЗНІ сервіси. DAX працює ТІЛЬКИ з DynamoDB API, ElastiCache — універсальний кеш для будь-якої БД.</div>
+  <footer class="section-tag">2. Amazon DynamoDB</footer>
+</section>
+
+<section class="slide content">
+  <header><h2>DynamoDB vs RDS vs ElastiCache</h2><p class="eyebrow">Найпоширеніша пастка на іспиті — плутанина трьох сервісів</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Критерій</th><th>RDS/Aurora</th><th>DynamoDB</th><th>ElastiCache</th></tr></thead>
+    <tbody>
+      <tr><td>Модель даних</td><td>Реляційна (SQL)</td><td>NoSQL (документи)</td><td>Key/Value (in-memory)</td></tr>
+      <tr><td>Схема</td><td>Строга, фіксована</td><td>Гнучка</td><td>Немає (просто значення)</td></tr>
+      <tr><td>JOIN-и</td><td>Так</td><td>Ні</td><td>Ні</td></tr>
+      <tr><td>Latency</td><td>Мілісекунди</td><td>Одиничні мілісекунди</td><td>Sub-мілісекунди</td></tr>
+      <tr><td>Керування серверами</td><td>Ти обираєш instance type</td><td>Serverless, немає інстансів</td><td>Ти обираєш instance type</td></tr>
+      <tr><td>Транзакції</td><td>Повний ACID</td><td>Обмежена підтримка транзакцій</td><td>Немає</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <footer class="section-tag">2. Amazon DynamoDB</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: DynamoDB</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>У чому різниця між DAX і ElastiCache перед DynamoDB — чому не можна поставити ElastiCache перед DynamoDB API напряму?</li><li>Коли обереш On-Demand capacity замість Provisioned з auto-scaling?</li><li>Як DynamoDB Streams інтегрується з Lambda — намалюй словами весь ланцюжок події.</li><li>Чому Global Tables — не просто "read replica в іншому регіоні"?</li></ol>
+  <footer class="section-tag">2. Amazon DynamoDB</footer>
+</section>
+
+<section class="slide section-title">
+  <div class="accent-line"></div>
+  <h2 class="section-num">Розділ 3</h2>
+  <h1>Інші бази даних AWS</h1>
+  <p class="subtitle">DocumentDB, Neptune, Keyspaces, Timestream — рідше, але тестуються</p>
+</section>
+
+<section class="slide content">
+  <header><h2>Спеціалізовані бази даних</h2><p class="eyebrow">Кожна — "AWS-версія" відомого відкритого стандарту</p></header>
+  <div class="body">
+  <table>
+    <thead><tr><th>Сервіс</th><th>Це "AWS-версія"</th><th>Use case</th></tr></thead>
+    <tbody>
+      <tr><td>DocumentDB</td><td>MongoDB</td><td>Зберігання/запит/індексація JSON-документів</td></tr>
+      <tr><td>Neptune</td><td>Graph DB (як Neo4j)</td><td>Соцмережі, fraud detection, recommendation engines, до мільярдів зв'язків</td></tr>
+      <tr><td>Keyspaces</td><td>Apache Cassandra</td><td>IoT-дані, time-series, CQL query language, serverless</td></tr>
+      <tr><td>Timestream</td><td>Спеціалізована Time Series DB</td><td>Трильйони подій/день, IoT, real-time аналітика, дешевша за RDBMS у 10 разів</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note tip"><span class="note-label">EXAM TIP</span>Якщо сценарій згадує назву відкритого стандарту (MongoDB, Cassandra) прямим текстом — шукай "AWS-версію" в списку вище, а не намагайся впихнути MongoDB напряму на EC2.</div>
+  <footer class="section-tag">3. Інші бази даних AWS</footer>
+</section>
+
+<section class="slide self-test">
+  <header><h2>Self-Test: Спеціалізовані БД</h2><p class="eyebrow">Метод Фейнмана — крок 4: поясни своїми словами (закрий конспект)</p></header>
+  <p class="prompt">Спробуй пояснити вголос, ніби студенту-новачку:</p>
+  <ol class="test-list"><li>Сценарій: "граф соціальних зв'язків, мільярди ребер" — яку БД обереш?</li><li>Сценарій: "дані з тисяч IoT-сенсорів, часові мітки, дешево" — яку БД обереш?</li><li>Компанія вже використовує MongoDB локально і хоче мігрувати в AWS без переписування коду — що порадиш?</li></ol>
+  <footer class="section-tag">3. Інші бази даних AWS</footer>
+</section>
+
+<section class="slide cover closing">
+  <h1>Підсумок: Databases in AWS одним поглядом</h1>
+  <ul class="recap"><li>Спершу питання про workload (read/write, latency, JOIN-и, схема) — ПОТІМ вибір сервісу</li><li>DynamoDB: serverless NoSQL, DAX для мікросекундного read-кешу, Streams для event-driven, Global Tables для active-active мульти-регіону</li><li>DynamoDB МОЖЕ замінити ElastiCache для session storage (через TTL) — але DAX ≠ ElastiCache</li><li>Спеціалізовані БД — це "AWS-версії" відкритих стандартів: DocumentDB=MongoDB, Keyspaces=Cassandra, Neptune=Graph, Timestream=Time Series</li></ul>
+  <p class="tag">DynamoDB — один з найбільш тестованих сервісів іспиту. Не пропускай цю тему.</p>
+</section>
+</div>
+<div class="navbar">
+  <a class="hub-link" href="index.html" title="До хабу всіх тем">&#8962; Хаб тем</a>
+  <span class="brand">AWS SAA-C03 · Feynman Study Deck</span>
+  <div class="controls">
+    <span id="counter">1 / 15</span>
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+  </div>
+</div>
+<script>
+
+  const deck = document.getElementById('deck');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const total = slides.length;
+  const DECK_ID = location.pathname.split('/').pop();
+
+  function currentIndex() {
+    const scrollTop = deck.scrollTop;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetTop - scrollTop);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function saveProgress(idx) {
+    try {
+      const key = 'saa_progress';
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      data[DECK_ID] = { idx: idx, total: total, done: idx >= total - 1 };
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function updateUI() {
+    const idx = currentIndex();
+    counter.textContent = (idx + 1) + " / " + total;
+    progress.style.width = ((idx + 1) / total * 100) + "%";
+    saveProgress(idx);
+  }
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('next').onclick = () => goTo(currentIndex() + 1);
+  document.getElementById('prev').onclick = () => goTo(currentIndex() - 1);
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); goTo(currentIndex() + 1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentIndex() - 1); }
+  });
+  deck.addEventListener('scroll', updateUI);
+  updateUI();
+
+</script>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="modal-close">&times;</span>
+  <img class="modal-content" id="modalImg" onclick="event.stopPropagation()">
+  <div class="modal-caption" id="modalCaption"></div>
+</div>
+
+<script>
+  function openModal(src, caption) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const modalCap = document.getElementById("modalCaption");
+    if (modal && modalImg) {
+      modal.classList.add("active");
+      modalImg.src = src;
+      if (modalCap) modalCap.textContent = caption || "";
+    }
+  }
+  function closeModal() {
+    const modal = document.getElementById("imageModal");
+    if (modal) modal.classList.remove("active");
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+</script>
+
+</body>
+</html>
